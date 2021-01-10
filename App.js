@@ -1,7 +1,6 @@
-import { AppLoading } from 'expo';
-import { Asset } from 'expo-asset';
-import * as Font from 'expo-font';
-import React, { useState } from 'react';
+import AppLoading from 'expo-app-loading';
+import { useFonts } from 'expo-font';
+import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Provider } from 'react-redux';
@@ -10,15 +9,14 @@ import store from './redux';
 import AppNavigator from './navigation/AppNavigator';
 
 export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
+  let [fontsLoaded] = useFonts({
+    ...Ionicons.font,
+    'passion-one-regular': require('./assets/fonts/PassionOne-Regular.otf'),
+  });
 
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
+  if (!fontsLoaded && !props.skipLoadingScreen) {
     return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
+      <AppLoading />
     );
   } else {
     return (
@@ -30,24 +28,6 @@ export default function App(props) {
       </Provider>
     );
   }
-}
-
-async function loadResourcesAsync() {
-  await Promise.all([
-    Asset.loadAsync([]),
-    Font.loadAsync({
-      ...Ionicons.font,
-      'passion-one-regular': require('./assets/fonts/PassionOne-Regular.otf'),
-    }),
-  ]);
-}
-
-function handleLoadingError(error) {
-  console.warn(error);
-}
-
-function handleFinishLoading(setLoadingComplete) {
-  setLoadingComplete(true);
 }
 
 const styles = StyleSheet.create({
