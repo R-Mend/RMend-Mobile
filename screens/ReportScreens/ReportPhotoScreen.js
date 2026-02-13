@@ -1,10 +1,9 @@
-import { StyleSheet, Text, Image, View, ScrollView, Alert, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, Image, View, ScrollView, Alert } from 'react-native';
 import { ActionSheetIOS, Dimensions, TouchableOpacity, Platform } from 'react-native';
-import { ActivityIndicator } from 'react-native';
-import { AntDesign, Entypo } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AntDesign } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
-import * as Permissions from 'expo-permissions';
 import React from 'react';
 import {
   widthPercentageToDP as wp,
@@ -25,9 +24,9 @@ class ReportScreen extends React.Component {
   }
 
   getPermissionAsync = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    const { captureStatus } = await Permissions.askAsync(Permissions.CAMERA);
-    if (status !== 'granted' && captureStatus !== 'granted') {
+    const { status: mediaLibraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+    if (mediaLibraryStatus !== 'granted' && cameraStatus !== 'granted') {
       alert('Sorry, we need camera roll and camera permissions to make this work!');
     }
   };
@@ -39,7 +38,7 @@ class ReportScreen extends React.Component {
       allowsEditing: true,
       quality: 1,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       addImage(result.uri);
     }
   };
@@ -52,7 +51,7 @@ class ReportScreen extends React.Component {
       quality: 1,
       base64: true,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       addImage(result.uri);
     }
   };

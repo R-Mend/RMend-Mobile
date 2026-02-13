@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -23,7 +16,7 @@ class ProfileScreen extends React.Component {
 
   UNSAFE_componentWillMount() {
     const { navigation } = this.props;
-    this.navigationListener = navigation.addListener('willFocus', async () => {
+    this.navigationListener = navigation.addListener('focus', async () => {
       if (firebaseApp.auth().currentUser !== null) {
         if (this.state.displayName === null) {
           this.setState({ isLoading: true });

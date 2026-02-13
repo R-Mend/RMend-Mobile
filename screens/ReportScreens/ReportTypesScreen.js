@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, FlatList, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -11,11 +12,9 @@ import { updateDetails, updateAuthority } from '../../redux/actions';
 class ReportTypesScreen extends React.Component {
   render() {
     const {
-      navigation: {
-        navigate,
-        state: {
-          params: { types, iconName, authority },
-        },
+      navigation: { navigate },
+      route: {
+        params: { types, iconName, authority },
       },
       details,
       updateDetails,

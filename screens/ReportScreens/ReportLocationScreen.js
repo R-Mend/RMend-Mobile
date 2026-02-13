@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Image, TextInput, View, SafeAreaView, ActivityIndicator } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { featureEach, booleanContains, point, distance } from '@turf/turf';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
 import { connect } from 'react-redux';
 import {
   widthPercentageToDP as wp,
@@ -24,7 +24,7 @@ class ReportLocationScreen extends React.Component {
   }
 
   _getLocationAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       let location = await Location.getCurrentPositionAsync({});
       this.updateRegion(location.coords);

@@ -5,7 +5,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-export default LoadingOverlay = (props) => {
+export default function LoadingOverlay() {
   return (
     <View style={styles.loadingOverlay}>
       <ActivityIndicator size="large" color="white" />

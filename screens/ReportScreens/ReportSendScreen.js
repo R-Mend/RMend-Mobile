@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  Text,
-  StyleSheet,
-  ScrollView,
-  View,
-  Alert,
-  Image,
-  SafeAreaView,
-  ActivityIndicator,
-} from 'react-native';
+import { Text, StyleSheet, ScrollView, View, Alert, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TouchableHighlight, TextInput } from 'react-native-gesture-handler';
 import { connect } from 'react-redux';
 import {

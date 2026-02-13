@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, SafeAreaView, Text, TouchableOpacity, Image, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, Image, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
 import {
   widthPercentageToDP as wp,

@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  ScrollView,
-  Image,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, View, ScrollView, Image, Text, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -19,7 +12,7 @@ import Colors from '../../constants/Colors';
 
 export default class ReportInfoScreen extends React.Component {
   render() {
-    const { images, location, details, senderInfo } = this.props.navigation.state.params.report;
+    const { images, location, details, senderInfo } = this.props.route.params.report;
     const { navigate } = this.props.navigation;
     return (
       <SafeAreaView style={styles.container}>

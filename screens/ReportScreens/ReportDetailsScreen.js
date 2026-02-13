@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  View,
-  SafeAreaView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -27,7 +19,7 @@ class ReportDetailsScreen extends React.Component {
 
   componentDidMount() {
     const { navigation } = this.props;
-    this.navigationListener = navigation.addListener('willFocus', async () => {
+    this.navigationListener = navigation.addListener('focus', async () => {
       if (this.state.county != this.props.county) {
         await this.getIssueTypes();
       }

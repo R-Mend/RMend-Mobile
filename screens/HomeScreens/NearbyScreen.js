@@ -1,20 +1,11 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  Image,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
 import { geo } from '../../config/FirebaseApp';
 import { get } from 'geofirex';
 import Colors from '../../constants/Colors';
@@ -27,7 +18,7 @@ export default class NearbyScreen extends React.Component {
   }
 
   _getReportsAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       let location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;

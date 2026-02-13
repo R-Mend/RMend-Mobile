@@ -1,7 +1,8 @@
-import firebase from 'firebase';
-import '@firebase/firestore';
-import '@firebase/storage';
-import '@firebase/functions';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+import 'firebase/compat/storage';
+import 'firebase/compat/functions';
 import * as geofirex from 'geofirex';
 import { FIREBASE_DEV_CONFIG } from './keys';
 
