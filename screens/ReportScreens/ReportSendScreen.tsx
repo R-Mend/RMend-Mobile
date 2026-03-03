@@ -15,8 +15,34 @@ import validate from '../../redux/validate';
 import Header from '../../components/Header';
 import Colors from '../../constants/Colors';
 
-class ReportSendScreen extends React.Component {
-  componentWillMount() {
+import { ReportTabScreenProps } from '../../navigation/ReportNavigator';
+
+interface ReportSendScreenProps extends ReportTabScreenProps<'Send'> {
+  report: {
+    images: any[];
+    details: any;
+    senderInfo: any;
+    location: { latitude: any, longitude: any },
+    authority: { authCode: any, name: any, type: any },
+    isLoading: boolean;
+    info: any;
+  };
+  updateSenderInfo: (info: any) => void;
+  resetReport: () => void;
+  startUpload: () => void;
+  stopUpload: () => void;
+  updateInfo: (info: any) => void;
+}
+
+interface ReportSendScreenState {
+  name: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+}
+
+class ReportSendScreen extends React.Component<ReportSendScreenProps, ReportSendScreenState> {
+  // TODO: Refactor to not use UNSAFE_componentWillMount
+  UNSAFE_componentWillMount() {
     const user = firebaseApp.auth().currentUser;
     this.props.updateSenderInfo({
       name: user.displayName,
@@ -47,7 +73,7 @@ class ReportSendScreen extends React.Component {
         this.props.stopUpload();
       } else {
         await resetReport();
-        navigation.navigate('Home');
+        navigation.getParent().navigate('Home');
       }
     }
   };
@@ -64,7 +90,7 @@ class ReportSendScreen extends React.Component {
           navTitleTwo="Send"
           navActionOne={() => {
             resetReport();
-            navigation.navigate('Home');
+            navigation.getParent().navigate('Home');
           }}
           navActionTwo={() => {
             Alert.alert(

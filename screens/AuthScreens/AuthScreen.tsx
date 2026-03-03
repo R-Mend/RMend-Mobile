@@ -7,13 +7,14 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Colors from '../../constants/Colors';
+import { RootStackScreenProps } from '../../navigation/types';
 
-export default class AuthScreen extends React.Component {
+export default class AuthScreen extends React.Component<RootStackScreenProps<'SignIn'>> {
   render() {
     const { navigation } = this.props;
     return (
       <SafeAreaView style={styles.container}>
-        {/* Only used when authentication is promtend from profile screen not from loading the app */}
+        {/* Only used when authentication is prompted from profile screen not from loading the app */}
         {/* <TouchableOpacity style={styles.close} onPress={() => navigation.navigate('Profile')}>
           <AntDesign name="close" size={wp('10%')} color="white" />
         </TouchableOpacity> */}

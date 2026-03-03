@@ -1,8 +1,8 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { MaterialIcons, Entypo, AntDesign } from '@expo/vector-icons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp
@@ -15,13 +15,26 @@ import ReportSendScreen from '../screens/ReportScreens/ReportSendScreen';
 import ReportTypesScreen from '../screens/ReportScreens/ReportTypesScreen';
 import ReportTypeGroupsScreen from '../screens/ReportScreens/ReportTypeGroupsScreen';
 
-const Tab = createMaterialTopTabNavigator();
+const Tab = createMaterialTopTabNavigator<ReportTabParamList>();
+
+export type ReportTabParamList = {
+  Photo: undefined;
+  Location: undefined;
+  Details: {
+    details: any;
+    updateDetails: any;
+    resetReport: any;
+    isLoading: boolean;
+    county: string;
+  };
+  Send: undefined;
+};
 
 function ReportNavigator() {
   return (
     <Tab.Navigator
       tabBarPosition="bottom"
-      swipeEnabled={false}
+      // swipeEnabled={false}
       screenOptions={{
         tabBarIndicatorStyle: {
           display: 'none'
@@ -82,7 +95,35 @@ function ReportNavigator() {
   );
 }
 
+export type ReportTabScreenProps<T extends keyof ReportTabParamList> =
+  NativeStackScreenProps<ReportTabParamList, T>;
+
 const Stack = createNativeStackNavigator();
+
+export type ReportStackParamList = {
+  Report: undefined;
+  ReportTypeGroups: {
+    issueGroups: Array<{
+      name: string;
+      types: Array<string>;
+      iconName: string;
+      authority: {
+        authCode: string;
+        name: string;
+        type: string;
+      };
+    }>;
+  };
+  ReportTypes: {
+    types: Array<string>;
+    iconName: string;
+    authority: {
+      authCode: string;
+      name: string;
+      type: string;
+    };
+  };
+};
 
 function MainReportNavigator() {
   return (
@@ -121,7 +162,7 @@ function MainReportNavigator() {
   );
 }
 
-const tabBarIcon = focused => {
+const tabBarIcon = (focused: boolean): ViewStyle => {
   return {
     width: wp('10%'),
     height: wp('10%'),
@@ -133,3 +174,6 @@ const tabBarIcon = focused => {
 };
 
 export default MainReportNavigator;
+
+export type ReportStackScreenProps<T extends keyof ReportStackParamList> =
+  NativeStackScreenProps<ReportStackParamList, T>;

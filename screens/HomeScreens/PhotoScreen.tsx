@@ -6,10 +6,11 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { firebaseApp } from '../../config/FirebaseApp';
+import { HomeTabScreenProps } from '../../navigation/HomeNavigator';
 
-export default class PhotoScreen extends React.Component {
+export default class PhotoScreen extends React.Component<HomeTabScreenProps<'Photo'>> {
   render() {
-    const { navigate } = this.props.navigation;
+    const { navigate } = this.props.navigation.getParent();
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.headerWrapper}>

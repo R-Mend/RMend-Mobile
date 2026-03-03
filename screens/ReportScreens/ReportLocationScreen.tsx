@@ -13,10 +13,19 @@ import {
 import Header from '../../components/Header';
 import mapStyle from '../../constants/MapStyle';
 import { updateLocation, updateCounty, resetReport } from '../../redux/actions';
-import currentAuthJSON from '../../constants/json/current_rmend_counties.json';
+import currentAuthJSON from '../../constants/json/current_rmend_counties.json' with { type: 'json' };
 import LoadingOverlay from '../../components/LoadingOverlay';
+import { ReportTabScreenProps } from '../../navigation/ReportNavigator';
 
-class ReportLocationScreen extends React.Component {
+interface ReportLocationScreenProps extends ReportTabScreenProps<'Location'> {
+  updateLocation: (location: { latitude: number; longitude: number }) => void;
+  updateCounty: (county: string) => void;
+  resetReport: () => void;
+  isLoading: boolean;
+  location: { latitude: number; longitude: number };
+}
+
+class ReportLocationScreen extends React.Component<ReportLocationScreenProps> {
   state = { loaded: false, latitude: null, longitude: null };
 
   componentDidMount() {
@@ -41,7 +50,7 @@ class ReportLocationScreen extends React.Component {
   updateReportsCounty = async (latitude, longitude) => {
     const coordinate = point([longitude, latitude]);
     var found = false;
-    await featureEach(currentAuthJSON, (feature) => {
+    featureEach(currentAuthJSON as any, (feature) => {
       if (booleanContains(feature, coordinate)) {
         found = true;
         const county = feature.properties.NAME;
@@ -66,7 +75,7 @@ class ReportLocationScreen extends React.Component {
           navTitleTwo="Next"
           navActionOne={() => {
             resetReport();
-            navigation.navigate('Home');
+            navigation.getParent().navigate('Home');
           }}
           navActionTwo={() => navigation.navigate('Details')}
         />

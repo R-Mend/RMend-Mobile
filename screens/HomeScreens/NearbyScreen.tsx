@@ -9,8 +9,11 @@ import * as Location from 'expo-location';
 import { geo } from '../../config/FirebaseApp';
 import { get } from 'geofirex';
 import Colors from '../../constants/Colors';
+import { HomeTabScreenProps } from '../../navigation/HomeNavigator';
 
-export default class NearbyScreen extends React.Component {
+interface NearbyScreenProps extends HomeTabScreenProps<'Nearby'> {}
+
+export default class NearbyScreen extends React.Component<NearbyScreenProps> {
   state = { reports: [], isLoaded: false, refreshing: false };
 
   componentDidMount() {
@@ -72,7 +75,7 @@ export default class NearbyScreen extends React.Component {
 
   renderPage = () => {
     let reports = this.state.reports;
-    const { navigate } = this.props.navigation;
+    const { navigate } = this.props.navigation.getParent();
     return (
       <FlatList
         style={{ marginTop: '22%' }}
@@ -182,12 +185,11 @@ const styles = StyleSheet.create({
     width: wp('70%'),
     height: hp('13%'),
     backgroundColor: 'white',
-    borderRadius: wp('3%'),
+    borderRadius: wp('3%') | 20,
     marginTop: hp('2%'),
     paddingLeft: wp('15%'),
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 20,
     position: 'relative',
   },
   reportImage: {

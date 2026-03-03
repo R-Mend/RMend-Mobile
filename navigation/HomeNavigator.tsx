@@ -6,7 +6,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { firebaseApp } from '../config/FirebaseApp';
 import NearbyScreen from '../screens/HomeScreens/NearbyScreen';
@@ -15,7 +15,13 @@ import ProfileScreen from '../screens/HomeScreens/ProfileScreen';
 import ReportInfoScreen from '../screens/HomeScreens/ReportInfoScreen';
 import MainReportNavigator from './ReportNavigator';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<HomeTabParamList>();
+
+export type HomeTabParamList = {
+  Nearby: undefined;
+  Photo: undefined;
+  Profile: undefined;
+};
 
 function HomeNavigator() {
   return (
@@ -45,7 +51,7 @@ function HomeNavigator() {
                 alignItems: 'center',
               }}
             >
-              <AntDesign name="filetext1" size={wp('6%')} color={focused ? '#FFF' : '#666'} />
+              <AntDesign name="file-text" size={wp('6%')} color={focused ? '#FFF' : '#666'} />
             </View>
           ),
         }}
@@ -84,7 +90,7 @@ function HomeNavigator() {
                 alignItems: 'center',
               }}
             >
-              <AntDesign name="smileo" size={wp('6%')} color={focused ? '#FFF' : '#666'} />
+              <AntDesign name="smile" size={wp('6%')} color={focused ? '#FFF' : '#666'} />
             </View>
           ),
         }}
@@ -101,7 +107,20 @@ function HomeNavigator() {
   );
 }
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<MainHomeStackParamList>();
+
+export type MainHomeStackParamList = {
+  Home: undefined;
+  ReportInfo: {
+    report: {
+      images: any[];
+      location: any;
+      details: any;
+      senderInfo: any;
+    };
+  };
+  Report: undefined;
+};
 
 function MainHomeNavigator() {
   return (
@@ -121,3 +140,9 @@ function MainHomeNavigator() {
 }
 
 export default MainHomeNavigator;
+
+export type MainHomeStackScreenProps<T extends keyof MainHomeStackParamList> =
+  NativeStackScreenProps<MainHomeStackParamList, T>;
+
+export type HomeTabScreenProps<T extends keyof HomeTabParamList> =
+  NativeStackScreenProps<HomeTabParamList, T>;

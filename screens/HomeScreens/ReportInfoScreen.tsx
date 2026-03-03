@@ -9,11 +9,14 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import openMap from 'react-native-open-maps';
 import mapStyle from '../../constants/MapStyle';
 import Colors from '../../constants/Colors';
+import { MainHomeStackScreenProps } from '../../navigation/HomeNavigator';
 
-export default class ReportInfoScreen extends React.Component {
+interface ReportInfoScreenProps extends MainHomeStackScreenProps<'ReportInfo'> {}
+
+export default class ReportInfoScreen extends React.Component<ReportInfoScreenProps> {
   render() {
     const { images, location, details, senderInfo } = this.props.route.params.report;
-    const { navigate } = this.props.navigation;
+    const { navigate } = this.props.navigation.getParent();
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.titleWrapper}>
@@ -23,7 +26,7 @@ export default class ReportInfoScreen extends React.Component {
         <ScrollView>
           <View style={styles.info}>
             <Text style={styles.header}>Images</Text>
-            <Text style={styles.subHeader}>Images of the incident and the surouding area</Text>
+            <Text style={styles.subHeader}>Images of the incident and the surrounding area</Text>
             <ScrollView
               contentContainerStyle={styles.images}
               horizontal={true}

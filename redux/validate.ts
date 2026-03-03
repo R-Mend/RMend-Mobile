@@ -1,5 +1,14 @@
+export interface IValidationErrors {
+  photos?: string,
+  location?: string,
+  type?: string,
+  authority?: string,
+  name?: string,
+  email?: string
+}
+
 const validate = (values) => {
-  const errors = {};
+  const errors: IValidationErrors = {};
   if (values.images && values.images.length < 1) {
     errors.photos = 'One Photo is Required';
   }
