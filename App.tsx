@@ -4,9 +4,9 @@ import React, { useCallback } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Provider } from 'react-redux';
-import store from './redux';
 
-import AppNavigator from './navigation/AppNavigator';
+import store from '@/redux';
+import AppNavigator from '@/navigation/AppNavigator';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -14,7 +14,7 @@ SplashScreen.preventAutoHideAsync();
 export default function App(props) {
   const [fontsLoaded] = useFonts({
     ...Ionicons.font,
-    'passion-one-regular': require('./assets/fonts/PassionOne-Regular.otf'),
+    'passion-one-regular': require('@/assets/fonts/PassionOne-Regular.otf'),
   });
 
   const onLayoutRootView = useCallback(async () => {
