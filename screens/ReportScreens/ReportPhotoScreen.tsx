@@ -15,8 +15,17 @@ import InfoMessage from '../../components/InfoMessage';
 import { addImage, removeImage, resetReport } from '../../redux/actions';
 const imagesPlaceholder = '../../assets/images/placeholder-dark.jpg';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import { ReportTabScreenProps } from '../../navigation/ReportNavigator';
 
-class ReportScreen extends React.Component {
+interface ReportScreenProps extends ReportTabScreenProps<'Photo'> {
+  images: string[];
+  addImage: (image: string) => void;
+  removeImage: (index: number) => void;
+  resetReport: () => void;
+  isLoading: boolean;
+}
+
+class ReportScreen extends React.Component<ReportScreenProps> {
   state = { images: [], imageCount: 0, ready: false };
 
   componentDidMount() {
@@ -39,7 +48,7 @@ class ReportScreen extends React.Component {
       quality: 1,
     });
     if (!result.canceled) {
-      addImage(result.uri);
+      addImage(result.assets[0].uri);
     }
   };
 
@@ -52,7 +61,7 @@ class ReportScreen extends React.Component {
       base64: true,
     });
     if (!result.canceled) {
-      addImage(result.uri);
+      addImage(result.assets[0].uri);
     }
   };
 
@@ -92,7 +101,7 @@ class ReportScreen extends React.Component {
           navTitleTwo="Next"
           navActionOne={() => {
             this.props.resetReport();
-            navigation.navigate('Home');
+            navigation.getParent().navigate('Home');
           }}
           navActionTwo={() => navigation.navigate('Location')}
         />
@@ -116,7 +125,9 @@ class ReportScreen extends React.Component {
           {images.map((image, index) => {
             return (
               <View style={styles.imageWrapper} key={index}>
-                <Image source={{ isStatic: true, uri: image }} style={styles.image} />
+                {/* TODO: Determine if isStatic is needed and if so what to replace it with */}
+                {/* <Image source={{ isStatic: true, uri: image }} style={styles.image} /> */}
+                <Image source={{ uri: image }} style={styles.image} />
                 <View style={styles.imageDeleteContainer}>
                   <TouchableOpacity style={styles.imageDelete} onPress={() => removeImage(index)}>
                     <AntDesign name="delete" size={wp('5%')} color={'white'} />

@@ -12,8 +12,17 @@ import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import Header from '../../components/Header';
 import Colors from '../../constants/Colors';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import { ReportTabScreenProps } from '../../navigation/ReportNavigator';
 
-class ReportDetailsScreen extends React.Component {
+interface ReportDetailsScreenProps extends ReportTabScreenProps<'Details'> {
+  details: any;
+  updateDetails: (details: any) => void;
+  resetReport: () => void;
+  isLoading: boolean;
+  county: string;
+}
+
+class ReportDetailsScreen extends React.Component<ReportDetailsScreenProps> {
   state = { county: '', issueGroups: [] };
   navigationListener = null;
 
@@ -46,8 +55,8 @@ class ReportDetailsScreen extends React.Component {
   };
 
   render() {
+    const navigate = this.props.navigation.getParent().navigate;
     const {
-      navigation: { navigate },
       details,
       updateDetails,
       resetReport,

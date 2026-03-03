@@ -9,11 +9,24 @@ import { firebaseApp, signOut, updateProfile, getAuthority } from '../../config/
 import { connect } from 'react-redux';
 import { getUserInfo, userSignedOut } from '../../redux/actions';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import { HomeTabScreenProps } from '../../navigation/HomeNavigator';
 
-class ProfileScreen extends React.Component {
+interface ProfileScreenProps extends HomeTabScreenProps<'Profile'> {
+  getUserInfo: () => Promise<void>;
+  userSignedOut: () => Promise<void>;
+  user: {
+    displayName: string | null;
+    email: string | null;
+    phoneNumber: string | null;
+    authCode: string;
+  };
+}
+
+class ProfileScreen extends React.Component<ProfileScreenProps> {
   state = { displayName: null, email: null, phoneNumber: null, authCode: '', isLoading: false };
   navigationListener = null;
 
+  // TODO: Refactor to use componentDidMount and componentWillUnmount
   UNSAFE_componentWillMount() {
     const { navigation } = this.props;
     this.navigationListener = navigation.addListener('focus', async () => {
@@ -43,11 +56,11 @@ class ProfileScreen extends React.Component {
     });
     // Auth when authentication is prompted from profile screen
     // this.props.navigation.navigate('Auth')
-    this.props.navigation.navigate('SignIn');
+    this.props.navigation.getParent().navigate('SignIn');
   };
 
   handleSignInOutPress = () => {
-    const { navigate } = this.props.navigation;
+    const { navigate } = this.props.navigation.getParent();
     if (firebaseApp.auth().currentUser != null) {
       this.signUserOut();
     }
@@ -66,10 +79,16 @@ class ProfileScreen extends React.Component {
   };
 
   validate = async () => {
+    interface IValidationErrors {
+      displayName?: string
+      email?: string;
+      phone?: string
+      authCode?: string;
+    }
     const { displayName, email, authCode, phoneNumber } = this.state;
     const validEmailReg = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
     const shouldUpdateAuthCode = this.props.user.authCode == this.state.authCode ? false : true;
-    let errors = {};
+    let errors: IValidationErrors = {};
     if (!displayName) {
       errors.displayName = 'Name is required';
       Alert.alert('Full Name is Required', 'Make sure you entered your full name and try agian.', [
@@ -95,7 +114,7 @@ class ProfileScreen extends React.Component {
     } else if (shouldUpdateAuthCode) {
       const results = await getAuthority(this.state.authCode);
       if (
-        (results.error || authCode.match([/\S\s/, /\s\S/])) &&
+        (results.error || authCode.match(/\S\s/) || authCode.match(/\s\S/)) &&
         authCode.replace(/\s/g, '').length > 0
       ) {
         errors.authCode = 'Invaled Authority Code';
@@ -138,7 +157,7 @@ class ProfileScreen extends React.Component {
                       'Please try agian and if this error continues report it to R.Mend',
                       [{ text: 'Ok' }]
                     );
-                    console.log(error);
+                    console.log(result.error);
                     this.setState({ isLoading: false });
                   } else {
                     this.signUserOut();
@@ -155,7 +174,7 @@ class ProfileScreen extends React.Component {
               'Please try agian and if this error continues report it to R.Mend',
               [{ text: 'Ok' }]
             );
-            console.log(error);
+            console.log(results.error);
             this.setState({ isLoading: false });
           } else {
             await this.props.getUserInfo();

@@ -5,8 +5,10 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { firebaseApp } from '../config/FirebaseApp';
+import { RootStackScreenProps } from '../navigation/AppNavigator';
 
-export default class Loading extends React.Component {
+
+export default class Loading extends React.Component<RootStackScreenProps<'Loading'>> {
   componentDidMount() {
     const listener = firebaseApp.auth().onAuthStateChanged((user) => {
       listener();

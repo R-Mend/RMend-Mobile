@@ -7,25 +7,30 @@ import {
 } from 'react-native-responsive-screen';
 import { Entypo } from '@expo/vector-icons';
 
-class ReportTypeGroupsScreen extends React.Component {
+import { ReportStackScreenProps } from '../../navigation/ReportNavigator';
+
+interface ReportTypeGroupsScreenProps extends ReportStackScreenProps<'ReportTypeGroups'> {}
+
+class ReportTypeGroupsScreen extends React.Component<ReportTypeGroupsScreenProps> {
   render() {
     const {
-      navigation: { navigate, state },
+      navigation,
+      route,
     } = this.props;
     return (
       <SafeAreaView style={styles.container}>
         <FlatList
           contentContainerStyle={styles.list}
-          data={state.params.issueGroups}
+          data={route.params.issueGroups}
           renderItem={(item) => {
             const { name, types, iconName, authority } = item.item;
             return (
               <TouchableOpacity
                 style={styles.selector}
-                onPress={() => navigate('ReportTypes', { types, iconName, authority })}
+                onPress={() => navigation.getParent().navigate('ReportTypes', { types, iconName, authority })}
               >
                 <Entypo
-                  name={iconName}
+                  name={iconName as any}
                   size={wp('7%')}
                   color="#ff6a30"
                   style={{ marginLeft: wp('2%') }}

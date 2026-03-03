@@ -1,15 +1,23 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import ReportInfoScreen from '../screens/HomeScreens/ReportInfoScreen';
 import LoadingScreen from '../screens/LoadingScreen';
 import MainHomeNavigator from './HomeNavigator';
 import AuthNavigator from './AuthNavigator';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function RootNavigator() {
+type RootStackParamList = {
+  Loading?: undefined;
+  SignIn?: undefined;
+  Home?: undefined;
+  ReportInfo?: undefined;
+};
+
+function RootNavigator(_: RootStackParamList) {
   return (
     <Stack.Navigator
       initialRouteName="Loading"
@@ -30,3 +38,6 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+export type RootStackScreenProps<T extends keyof RootStackParamList> =
+  NativeStackScreenProps<RootStackParamList, T>;

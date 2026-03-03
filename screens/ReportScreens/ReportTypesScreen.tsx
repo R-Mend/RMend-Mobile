@@ -9,7 +9,15 @@ import { connect } from 'react-redux';
 import { Entypo } from '@expo/vector-icons';
 import { updateDetails, updateAuthority } from '../../redux/actions';
 
-class ReportTypesScreen extends React.Component {
+import { ReportStackScreenProps } from '../../navigation/ReportNavigator';
+
+interface ReportTypesScreenProps extends ReportStackScreenProps<'ReportTypes'> {
+  details: any;
+  updateDetails: (details: any) => void;
+  updateAuthority: (authority: any) => void;
+}
+
+class ReportTypesScreen extends React.Component<ReportTypesScreenProps> {
   render() {
     const {
       navigation: { navigate },
@@ -38,7 +46,7 @@ class ReportTypesScreen extends React.Component {
                   }}
                 >
                   <Entypo
-                    name={iconName}
+                    name={iconName as any}
                     size={wp('7%')}
                     color="#ff6a30"
                     style={{ marginLeft: wp('2%') }}

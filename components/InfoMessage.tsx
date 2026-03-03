@@ -5,7 +5,11 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-export default function InfoMessage(props) {
+export interface IInfoMessageProps {
+  message: string;
+}
+
+export default function InfoMessage(props: IInfoMessageProps) {
   return (
     <View style={styles.infoMessage}>
       <Text style={styles.text}>{props.message}</Text>
