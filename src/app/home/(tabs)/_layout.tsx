@@ -1,32 +1,19 @@
 import React from 'react';
 import { View } from 'react-native';
+import { Tabs } from 'expo-router';
 import { Entypo, AntDesign } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { firebaseApp } from '@/config/FirebaseApp';
-import NearbyScreen from '@/screens/HomeScreens/NearbyScreen';
-import PhotoScreen from '@/screens/HomeScreens/PhotoScreen';
-import ProfileScreen from '@/screens/HomeScreens/ProfileScreen';
-import ReportInfoScreen from '@/screens/HomeScreens/ReportInfoScreen';
-import MainReportNavigator from './ReportNavigator';
 
-const Tab = createBottomTabNavigator<HomeTabParamList>();
 
-export type HomeTabParamList = {
-  Nearby: undefined;
-  Photo: undefined;
-  Profile: undefined;
-};
-
-function HomeNavigator() {
+export default function HomeLayout() {
   return (
-    <Tab.Navigator
-      initialRouteName="Photo"
+    <Tabs
+      initialRouteName="photo"
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -37,9 +24,8 @@ function HomeNavigator() {
         headerShown: false,
       }}
     >
-      <Tab.Screen
-        name="Nearby"
-        component={NearbyScreen}
+      <Tabs.Screen
+        name="nearby"
         options={{
           tabBarIcon: ({ focused }) => (
             <View
@@ -56,9 +42,8 @@ function HomeNavigator() {
           ),
         }}
       />
-      <Tab.Screen
-        name="Photo"
-        component={PhotoScreen}
+      <Tabs.Screen
+        name="photo"
         options={{
           tabBarIcon: ({ focused }) => (
             <View
@@ -76,9 +61,8 @@ function HomeNavigator() {
           ),
         }}
       />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+      <Tabs.Screen
+        name="profile"
         options={{
           tabBarIcon: ({ focused }) => (
             <View
@@ -95,54 +79,15 @@ function HomeNavigator() {
           ),
         }}
         listeners={({ navigation }) => ({
-          tabPress: (e) => {
+          tabPress: () => {
             if (firebaseApp.auth().currentUser === null) {
-              e.preventDefault();
-              navigation.navigate('SignIn');
+              // e.preventDefault();
+              navigation.navigate('signin');
             }
           },
         })}
       />
-    </Tab.Navigator>
+    </Tabs>
   );
 }
-
-const Stack = createNativeStackNavigator<MainHomeStackParamList>();
-
-export type MainHomeStackParamList = {
-  Home: undefined;
-  ReportInfo: {
-    report: {
-      images: any[];
-      location: any;
-      details: any;
-      senderInfo: any;
-    };
-  };
-  Report: undefined;
-};
-
-function MainHomeNavigator() {
-  return (
-    <Stack.Navigator
-      initialRouteName="Home"
-      screenOptions={{
-        headerShown: false,
-        gestureEnabled: false,
-        presentation: 'modal',
-      }}
-    >
-      <Stack.Screen name="Home" component={HomeNavigator} />
-      <Stack.Screen name="ReportInfo" component={ReportInfoScreen} />
-      <Stack.Screen name="Report" component={MainReportNavigator} />
-    </Stack.Navigator>
-  );
-}
-
-export default MainHomeNavigator;
-
-export type MainHomeStackScreenProps<T extends keyof MainHomeStackParamList> =
-  NativeStackScreenProps<MainHomeStackParamList, T>;
-
-export type HomeTabScreenProps<T extends keyof HomeTabParamList> =
-  NativeStackScreenProps<HomeTabParamList, T>;
+;

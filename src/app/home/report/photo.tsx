@@ -1,6 +1,5 @@
 import { StyleSheet, Text, Image, View, ScrollView, Alert } from 'react-native';
 import { ActionSheetIOS, Dimensions, TouchableOpacity, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
@@ -13,11 +12,12 @@ import {
 import Header from '@/components/Header';
 // import InfoMessage from '../../components/InfoMessage';
 import { addImage, removeImage, resetReport } from '@/redux/actions';
-const imagesPlaceholder = '@/assets/images/placeholder-dark.jpg';
+const imagesPlaceholder = '../../../assets/images/placeholder-dark.jpg';
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { ReportTabScreenProps } from '@/navigation/ReportNavigator';
+import { useRouter } from 'expo-router';
 
-interface ReportScreenProps extends ReportTabScreenProps<'Photo'> {
+
+interface ReportScreenProps {
   images: string[];
   addImage: (image: string) => void;
   removeImage: (index: number) => void;
@@ -25,14 +25,21 @@ interface ReportScreenProps extends ReportTabScreenProps<'Photo'> {
   isLoading: boolean;
 }
 
-class ReportScreen extends React.Component<ReportScreenProps> {
-  state = { images: [], imageCount: 0, ready: false };
+function ReportScreen(props: ReportScreenProps) {
+  const { images, addImage, removeImage, resetReport, isLoading } = props;
+  const router = useRouter();
 
-  componentDidMount() {
-    this.getPermissionAsync();
-  }
+  // TODO: [Image Upload Lmit] consider adding a limit to the number of photos uploaded
+  // const [imageCount, setImageCount] = React.useState(0);
+  // const [ready, setReady] = React.useState(false);
 
-  getPermissionAsync = async () => {
+  // React.useEffect(() => {
+  //   if (images.length > 0) {
+  //     setImageCount(images.length);
+  //   }
+  // }, [images]);
+
+  const getPermissionAsync = async () => {
     const { status: mediaLibraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
     if (mediaLibraryStatus !== 'granted' && cameraStatus !== 'granted') {
@@ -40,8 +47,11 @@ class ReportScreen extends React.Component<ReportScreenProps> {
     }
   };
 
-  _pickImage = async () => {
-    const { addImage } = this.props;
+  React.useEffect(() => {
+    getPermissionAsync();
+  }, []);
+
+  const _pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -52,8 +62,7 @@ class ReportScreen extends React.Component<ReportScreenProps> {
     }
   };
 
-  _takePhoto = async () => {
-    const { addImage } = this.props;
+  const _takePhoto = async () => {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -65,11 +74,11 @@ class ReportScreen extends React.Component<ReportScreenProps> {
     }
   };
 
-  photoAlert = () => {
+  const photoAlert = () => {
     if (Platform.OS == 'android') {
       Alert.alert('Get a photo from...', '', [
-        { text: 'Camera', onPress: () => this._takePhoto() },
-        { text: 'Take from Library', onPress: () => this._pickImage() },
+        { text: 'Camera', onPress: () => _takePhoto() },
+        { text: 'Take from Library', onPress: () => _pickImage() },
         { text: 'Cancel', style: 'cancel' },
       ]);
     } else {
@@ -80,71 +89,64 @@ class ReportScreen extends React.Component<ReportScreenProps> {
         },
         (buttonIndex) => {
           if (buttonIndex === 1) {
-            this._takePhoto();
+            _takePhoto();
           } else if (buttonIndex === 2) {
-            this._pickImage();
+            _pickImage();
           }
         }
       );
     }
   };
 
-  render() {
-    const { navigation, images, removeImage, isLoading } = this.props;
-    return (
-      <SafeAreaView style={styles.container}>
-        {isLoading && <LoadingOverlay />}
-        <Header
-          title="Photos"
-          {...this.props}
-          navTitleOne="Home"
-          navTitleTwo="Next"
-          navActionOne={() => {
-            this.props.resetReport();
-            navigation.getParent().navigate('Home');
-          }}
-          navActionTwo={() => navigation.navigate('Location')}
-        />
-        {/* <InfoMessage message="Include a photo of the incident" /> */}
-        <ScrollView
-          contentContainerStyle={styles.images}
-          horizontal={true}
-          directionalLockEnabled={false}
-          decelerationRate={0}
-          snapToAlignment={'center'}
-        >
-          {images.length < 1 && (
-            <TouchableOpacity
-              onPress={() => {
-                this.photoAlert();
-              }}
-            >
-              <Image style={styles.image} source={require(imagesPlaceholder)} />
-            </TouchableOpacity>
-          )}
-          {images.map((image, index) => {
-            return (
-              <View style={styles.imageWrapper} key={index}>
-                {/* TODO: Determine if isStatic is needed and if so what to replace it with */}
-                {/* <Image source={{ isStatic: true, uri: image }} style={styles.image} /> */}
-                <Image source={{ uri: image }} style={styles.image} />
-                <View style={styles.imageDeleteContainer}>
-                  <TouchableOpacity style={styles.imageDelete} onPress={() => removeImage(index)}>
-                    <AntDesign name="delete" size={wp('5%')} color={'white'} />
-                  </TouchableOpacity>
-                </View>
+  return (
+    <View style={styles.container}>
+      {isLoading && <LoadingOverlay />}
+      <Header
+        title="Photos"
+        {...props}
+        navTitleOne="Home"
+        navTitleTwo="Next"
+        navActionOne={() => {
+          resetReport();
+          router.replace('/home/(tabs)/photo');
+        }}
+        navActionTwo={() => router.navigate('/home/report/location')}
+      />
+      {/* <InfoMessage message="Include a photo of the incident" /> */}
+      <ScrollView
+        contentContainerStyle={styles.images}
+        horizontal={true}
+        directionalLockEnabled={false}
+        decelerationRate={0}
+        snapToAlignment={'center'}
+      >
+        {images.length < 1 && (
+          <TouchableOpacity onPress={() => photoAlert()}>
+            <Image style={styles.image} source={require(imagesPlaceholder)} />
+          </TouchableOpacity>
+        )}
+        {images.map((image, index) => {
+          return (
+            <View style={styles.imageWrapper} key={index}>
+              {/* TODO: Determine if isStatic is needed and if so what to replace it with */}
+              {/* <Image source={{ isStatic: true, uri: image }} style={styles.image} /> */}
+              <Image source={{ uri: image }} style={styles.image} />
+              <View style={styles.imageDeleteContainer}>
+                <TouchableOpacity style={styles.imageDelete} onPress={() => removeImage(index)}>
+                  <AntDesign name="delete" size={wp('5%')} color={'white'} />
+                </TouchableOpacity>
               </View>
-            );
-          })}
-        </ScrollView>
-        <TouchableOpacity style={styles.button} onPress={this.photoAlert}>
-          <Text style={{ fontSize: wp('6%'), color: 'white', fontWeight: 'bold' }}>
-            {images.length == 0 ? 'Add Photo' : 'Add Another Photo'}
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
+            </View>
+          );
+        })}
+      </ScrollView>
+      <TouchableOpacity style={styles.button} onPress={() => photoAlert()}>
+        <Text style={{ fontSize: wp('6%'), color: 'white', fontWeight: 'bold' }}>
+          {images.length == 0 ? 'Add Photo' : 'Add Another Photo'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const mapStateToProps = ({ report }) => {
@@ -158,7 +160,6 @@ export default connect(mapStateToProps, { addImage, removeImage, resetReport })(
 const styles = StyleSheet.create({
   container: {
     height: Dimensions.get('window').height,
-    paddingTop: 20,
     paddingBottom: 80,
     alignItems: 'center',
     backgroundColor: '#000',

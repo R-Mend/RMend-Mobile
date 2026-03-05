@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
@@ -7,21 +7,23 @@ import {
 } from 'react-native-responsive-screen';
 import * as Location from 'expo-location';
 import { get } from 'geofirex';
+import { useRouter } from 'expo-router';
 
 import { geo } from '@/config/FirebaseApp';
-// import Colors from '../../constants/Colors';
-import { HomeTabScreenProps } from '@/navigation/HomeNavigator';
 
-interface NearbyScreenProps extends HomeTabScreenProps<'Nearby'> {}
 
-export default class NearbyScreen extends React.Component<NearbyScreenProps> {
-  state = { reports: [], isLoaded: false, refreshing: false };
+export default function NearbyScreen() {
+  const [reports, setReports] = React.useState([]);
+  // const [isLoaded, setIsLoaded] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+  
+  const router = useRouter();
 
-  componentDidMount() {
-    this._getReportsAsync();
-  }
+  React.useEffect(() => {
+    _getReportsAsync();
+  }, []);
 
-  _getReportsAsync = async () => {
+  const _getReportsAsync = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       let location = await Location.getCurrentPositionAsync({});
@@ -30,66 +32,51 @@ export default class NearbyScreen extends React.Component<NearbyScreenProps> {
       const center = geo.point(latitude, longitude);
       const query = await reports.within(center, 2, 'geoData');
       const nearby = await get(query);
-      this.setState({ reports: nearby, isLoaded: true });
+      setReports(nearby);
+      // setIsLoaded(true);
+    } else {
+      Alert.alert('Location Permission Denied', 'Please enable location permissions to view nearby reports.');
     }
   };
 
-  handleRefresh = async () => {
-    this.setState({ refreshing: true });
+  const handleRefresh = async () => {
+    setRefreshing(true);
     await setTimeout(() => {}, 3000);
-    await this._getReportsAsync();
-    this.setState({ refreshing: false });
-  };
-  // componentDidMount() {
-  //     var lisenter = firebaseApp
-  //       .firestore()
-  //       .collection('reports')
-  //       .onSnapshot(snapShot => {
-  //         const reports = [];
-  //         snapShot.forEach(report => reports.push(report.data()));
-  //         this.setState({ reports });
-  //       });
-  //     this.setState({ lisenter });
-  // }
-
-  // componentWillUnmount() {
-  //     this.state.lisenter();
-  // }
-
-  renderReports = () => {
-    const reports = this.state.reports;
-    return reports.map((report) => {
-      const { details, images } = report;
-      return (
-        <TouchableOpacity style={styles.reportWrapper}>
-          <View style={styles.reportInfo}>
-            <Image source={images[0].imageUrl} style={styles.reportImage} />
-            <View>
-              <Text style={styles.reportType}>{details.type}</Text>
-              <Text style={styles.reportAuth}>{details.authority}</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      );
-    });
+    await _getReportsAsync();
+    setRefreshing(false);
   };
 
-  renderPage = () => {
-    let reports = this.state.reports;
-    const { navigate } = this.props.navigation.getParent();
+  // const renderReports = () => {
+  //   return reports.map((report) => {
+  //     const { details, images } = report;
+  //     return (
+  //       <TouchableOpacity style={styles.reportWrapper}>
+  //         <View style={styles.reportInfo}>
+  //           <Image source={images[0].imageUrl} style={styles.reportImage} />
+  //           <View>
+  //             <Text style={styles.reportType}>{details.type}</Text>
+  //             <Text style={styles.reportAuth}>{details.authority}</Text>
+  //           </View>
+  //         </View>
+  //       </TouchableOpacity>
+  //     );
+  //   });
+  // };
+
+  const renderPage = () => {
     return (
       <FlatList
         style={{ marginTop: '22%' }}
         contentContainerStyle={styles.list}
         data={reports}
-        refreshing={this.state.refreshing}
-        onRefresh={this.handleRefresh}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
         renderItem={(item) => {
           const { details, images } = item.item;
           return (
             <TouchableOpacity
               style={styles.reportInfo}
-              onPress={() => navigate('ReportInfo', { report: item.item })}
+              onPress={() => router.push({ pathname: '/reportinfo', params: { report: item.item } })} // TODO: replace with state management due to expo-router limitations
             >
               <Image source={{ uri: images[0].imageUrl }} style={styles.reportImage} />
               <View>
@@ -104,7 +91,7 @@ export default class NearbyScreen extends React.Component<NearbyScreenProps> {
             <View style={styles.emptyContainer}>
               <Image
                 style={styles.emptyImage}
-                source={require('@/assets/images/group_of_field_workers.png')}
+                source={require('../../../assets/images/group_of_field_workers.png')}
               />
               <Text style={styles.emptyText}>Couldn't find any nearby reports at this time</Text>
             </View>
@@ -114,16 +101,14 @@ export default class NearbyScreen extends React.Component<NearbyScreenProps> {
     );
   };
 
-  render() {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.headerWrapper}>
-          <Text style={styles.headerText}>Nearby</Text>
-        </View>
-        {this.renderPage()}
-      </SafeAreaView>
-    );
-  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerWrapper}>
+        <Text style={styles.headerText}>Nearby</Text>
+      </View>
+      {renderPage()}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
