@@ -76,7 +76,7 @@ function ReportDetailsScreen(props: ReportDetailsScreenProps) {
         navTitleTwo="Next"
         navActionOne={() => {
           resetReport();
-          router.replace('/home/(tabs)/photo');
+          router.dismiss();
         }}
         navActionTwo={() => router.navigate('/home/report/send')}
       />

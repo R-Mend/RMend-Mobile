@@ -75,7 +75,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
         stopUpload();
       } else {
         await resetReport();
-        router.navigate('/home/(tabs)/photo');
+        router.dismiss();
       }
     }
   };
@@ -90,7 +90,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
         navTitleTwo="Send"
         navActionOne={() => {
           resetReport();
-          router.replace('/home/(tabs)/photo');
+          router.dismiss();
         }}
         navActionTwo={() => {
           Alert.alert(
