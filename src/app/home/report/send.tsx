@@ -1,13 +1,12 @@
 import React from 'react';
-import { Text, StyleSheet, ScrollView, View, Alert, Image } from 'react-native';
-import { TouchableHighlight, TextInput } from 'react-native-gesture-handler';
+import { Text, StyleSheet, ScrollView, View, Alert, Image, TextInput } from 'react-native';
 import { connect } from 'react-redux';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import LoadingOverlay from '@/components/LoadingOverlay';
 
+import LoadingOverlay from '@/components/LoadingOverlay';
 import { updateSenderInfo, resetReport, startUpload, stopUpload } from '@/redux/actions';
 import { firebaseApp, createReport } from '@/config/FirebaseApp';
 import validate from '@/redux/validate';
@@ -107,7 +106,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
         <Text style={styles.header}>Authority</Text>
         <Text style={styles.subHeader}>This report will be sent to:</Text>
         {report.authority.name != '' && (
-          <TouchableHighlight style={styles.authInfoWrapper}>
+          <View style={styles.authInfoWrapper}>
             <View style={styles.authInfo}>
               <Image
                 source={require('../../../assets/images/placeholder-dark.jpg')}
@@ -118,16 +117,16 @@ function ReportSendScreen(props: ReportSendScreenProps) {
                 <Text style={styles.authInfoType}>{report.authority.type}</Text>
               </View>
             </View>
-          </TouchableHighlight>
+          </View>
         )}
         {report.authority.name == '' && (
-          <TouchableHighlight style={styles.authInfoWrapper}>
+          <View style={styles.authInfoWrapper}>
             <View style={styles.authInfo}>
               <View>
                 <Text style={styles.authInfoText}>Issue Type Selection Required</Text>
               </View>
             </View>
-          </TouchableHighlight>
+          </View>
         )}
         <Text style={styles.warring}>
           If this is an emergency, please call emergency services.
