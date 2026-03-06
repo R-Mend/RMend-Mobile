@@ -34,7 +34,7 @@ function CreateUserScreen() {
             setIsLoading(false);
           } else {
             setIsLoading(false);
-            router.navigate('/auth/signin')
+            router.dismiss();
           }
         })
         .catch((err) => {
@@ -141,7 +141,7 @@ function CreateUserScreen() {
         )}
       </Formik>
       <TouchableOpacity
-        onPress={() => router.navigate('/auth/signin')}
+        onPress={() => router.dismiss()}
         style={styles.link}
       >
         <Text style={styles.linkText}>Already have an account? Sign In</Text>
