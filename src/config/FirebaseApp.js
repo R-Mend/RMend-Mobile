@@ -9,34 +9,6 @@ import { FIREBASE_DEV_CONFIG } from './keys';
 export const firebaseApp = firebase.initializeApp(FIREBASE_DEV_CONFIG);
 export const geo = geofirex.init(firebase);
 
-export const createUserWithEmailAndPassword = async (email, password, displayName) => {
-  try {
-    const createNewUser = await firebaseApp.functions().httpsCallable('createNewUser');
-    const results = await createNewUser({ email, password, displayName });
-    return results;
-  } catch (err) {
-    return { error: err.message };
-  }
-};
-
-export const signInWithEmailAndPassword = async (email, password) => {
-  try {
-    await firebaseApp.auth().signInWithEmailAndPassword(email, password);
-    return { result: 'Successfully Signed User In' };
-  } catch (err) {
-    return { error: err.message };
-  }
-};
-
-export const signOut = async () => {
-  try {
-    await firebaseApp.auth().signOut();
-    return { result: 'Successfully Signed Out' };
-  } catch (err) {
-    return { error: err.message };
-  }
-};
-
 async function getBlobAsync(uri) {
   // Why are we using XMLHttpRequest? See:
   // https://github.com/expo/expo/issues/2402#issuecomment-443726662
