@@ -6,9 +6,27 @@ import { Provider } from 'react-redux';
 import { Stack } from 'expo-router';
 
 import store from '@/redux';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 
 // Keep the splash screen visible while we fetch resources
 // SplashScreen.preventAutoHideAsync();
+
+function RootStack() {
+  const { user, initializing } = useAuth();
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Protected guard={!initializing && !!user}>
+        <Stack.Screen name="home" />
+        <Stack.Screen name="reportinfo" />
+      </Stack.Protected>
+      <Stack.Protected guard={!initializing && !user}>
+        <Stack.Screen name="auth" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout(props) {
   const [fontsLoaded] = useFonts({
@@ -31,12 +49,9 @@ export default function RootLayout(props) {
 
   return (
     <Provider store={store}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="auth" />
-        <Stack.Screen name="home" />
-        <Stack.Screen name="reportinfo" />
-      </Stack>
+      <AuthProvider>
+        <RootStack />
+      </AuthProvider>
     </Provider>
   );
 }

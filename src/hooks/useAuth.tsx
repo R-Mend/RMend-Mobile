@@ -27,10 +27,10 @@ export type EmailPasswordCredentials = {
 export type UseAuthReturn = AuthState & {
   signInWithEmailPassword: (
     credentials: EmailPasswordCredentials
-  ) => Promise<{ user: FirebaseAuthTypes.User } | null>;
+  ) => Promise<{ user: AuthUser } | null>;
   signUpWithEmailPassword: (
     credentials: EmailPasswordCredentials & { displayName: string }
-  ) => Promise<{ user: FirebaseAuthTypes.User } | null>;
+  ) => Promise<{ user: AuthUser } | null>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };

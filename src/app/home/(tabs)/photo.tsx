@@ -7,11 +7,12 @@ import {
 } from 'react-native-responsive-screen';
 import { useRouter } from 'expo-router';
 
-import { firebaseApp } from '@/config/FirebaseApp';
+import { useAuth } from '@/hooks/useAuth';
 
 
 export default function PhotoScreen() {
   const router = useRouter();
+  const { user } = useAuth();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -26,7 +27,7 @@ export default function PhotoScreen() {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            if (firebaseApp.auth().currentUser != null) {
+            if (user != null) {
               router.push('/home/report/photo');
             } else {
               Alert.alert('You need to be signed in to report issues', '', [{ text: 'Okay' }]);

@@ -8,11 +8,12 @@ import {
 
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { updateSenderInfo, resetReport, startUpload, stopUpload } from '@/redux/actions';
-import { firebaseApp, createReport } from '@/config/FirebaseApp';
+import { createReport } from '@/config/FirebaseApp';
 import validate from '@/redux/validate';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/hooks/useAuth';
 
 
 interface ReportSendScreenProps {
@@ -39,9 +40,9 @@ function ReportSendScreen(props: ReportSendScreenProps) {
   const [phoneNumber, setPhoneNumber] = React.useState(null);
 
   const router = useRouter();
+  const { user } = useAuth();
 
   React.useEffect(() => {
-    const user = firebaseApp.auth().currentUser;
     if (user) {
       updateSenderInfo({
         name: user.displayName,
@@ -52,7 +53,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
       setEmail(user.email);
       setPhoneNumber(user.phoneNumber);
     }
-  }, [updateSenderInfo]);
+  }, [updateSenderInfo, user]);
 
   const sendReportAsync = async () => {
     const errors = validate(report);

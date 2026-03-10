@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
@@ -7,51 +7,31 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { connect } from 'react-redux';
 import { useRouter } from 'expo-router';
 
-import { userSignedIn } from '@/redux/actions';
 import Colors from '@/constants/Colors';
-import { signInWithEmailAndPassword } from '@/config/FirebaseApp';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import CommonStyles from '@/styles/CommonStyles';
 
-
-interface SignInScreenProps {
-  userSignedIn: () => Promise<void>;
-}
-
-function SignInScreen(props: SignInScreenProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
+export default function SignInScreen() {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { signInWithEmailPassword } = useAuth();
 
-  const handleSignInSubmit = (values) => {
-    if (values.email.length > 0 && values.password.length > 0) {
-      setIsLoading(true);
-      signInWithEmailAndPassword(values.email, values.password)
-        .then(async (result) => {
-          if (!result.error) {
-            await props.userSignedIn();
-            router.replace('/home/(tabs)/photo');
-            setIsLoading(false);
-          } else {
-            Alert.alert(
-              'Email or password is incorrect',
-              'Make sure you entered your email or password correctly and try again.',
-              [{ text: 'Ok', style: 'cancel' }]
-            );
-            setIsLoading(false);
-          }
-        })
-        .catch((err) => {
-          Alert.alert(
-            'An error occurred while signing in ',
-            'Please try again and if the error continues contact R.Mend for assistance.',
-            [{ text: 'Ok', style: 'cancel' }]
-          );
-          setIsLoading(false);
-          console.log(err);
-        });
+  const handleSignInSubmit = async (values: { email: string; password: string }) => {
+    if (values.email.length === 0 || values.password.length === 0) return;
+    setIsLoading(true);
+    try {
+      await signInWithEmailPassword({ email: values.email, password: values.password });
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+      Alert.alert(
+        'Email or password is incorrect',
+        err instanceof Error ? err.message : 'Make sure you entered your email or password correctly and try again.',
+        [{ text: 'Ok', style: 'cancel' }]
+      );
     }
   };
 
@@ -115,8 +95,6 @@ function SignInScreen(props: SignInScreenProps) {
     </SafeAreaView>
   );
 }
-
-export default connect(null, { userSignedIn })(SignInScreen);
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
