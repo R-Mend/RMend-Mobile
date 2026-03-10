@@ -33,7 +33,6 @@ export default function CreateUserScreen() {
         displayName: values.name,
       });
       setIsLoading(false);
-      // router.dismiss();
     } catch (err) {
       setIsLoading(false);
       const message =

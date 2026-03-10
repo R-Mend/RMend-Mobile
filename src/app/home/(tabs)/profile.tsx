@@ -51,8 +51,8 @@ function ProfileScreen(props: ProfileScreenProps) {
   }, [props.user]);
 
   const updateProfileFields = () => {
-    setEmail(props.user.email);
-    setDisplayName(props.user.displayName);
+    setEmail(user.email);
+    setDisplayName(user.displayName);
     setPhoneNumber(props.user.phoneNumber);
     setAuthCode(props.user.authCode);
   }
@@ -65,6 +65,7 @@ function ProfileScreen(props: ProfileScreenProps) {
   }
 
   const signUserOut = async () => {
+    setIsLoading(true);
     await props.userSignedOut();
     clearProfileFields();
     setIsLoading(false);
@@ -73,7 +74,7 @@ function ProfileScreen(props: ProfileScreenProps) {
 
   const handleSignInOutPress = () => {
     if (user != null) {
-      signOut();
+      signUserOut();
     }
   };
 

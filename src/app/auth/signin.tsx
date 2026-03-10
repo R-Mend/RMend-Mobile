@@ -25,7 +25,6 @@ export default function SignInScreen() {
     try {
       await signInWithEmailPassword({ email: values.email, password: values.password });
       setIsLoading(false);
-      // router.replace('/home/(tabs)/photo');
     } catch (err) {
       setIsLoading(false);
       Alert.alert(
