@@ -1,5 +1,4 @@
-import React, { use } from 'react';
-import { connect } from 'react-redux';
+import React, { useState } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
@@ -11,41 +10,37 @@ import {
 import { useRouter } from 'expo-router';
 
 import Colors from '@/constants/Colors';
-import { createUserWithEmailAndPassword } from '@/config/FirebaseApp';
-import { userSignedIn } from '@/redux/actions';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import CommonStyles from '@/styles/CommonStyles';
 
-
-function CreateUserScreen() {
-  const [isLoading, setIsLoading] = React.useState(false);
+export default function CreateUserScreen() {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { signUpWithEmailPassword } = useAuth();
 
-  const handleCreateUserSubmit = (values) => {
-    if (values.email.length > 0 && values.password.length > 0) {
-      setIsLoading(true);
-      createUserWithEmailAndPassword(values.email, values.password, values.name)
-        .then((results) => {
-          if (results.error) {
-            Alert.alert('An error occurred while creating your account', results.error, [
-              { text: 'Ok', style: 'cancel' },
-            ]);
-            console.log(results.error);
-            setIsLoading(false);
-          } else {
-            setIsLoading(false);
-            router.dismiss();
-          }
-        })
-        .catch((err) => {
-          Alert.alert(
-            'An error occurred while creating your account',
-            'Please try again and if the error continues contact R.Mend for help.',
-            [{ text: 'Ok', style: 'cancel' }]
-          );
-          console.log(err);
-          setIsLoading(false);
-        });
+  const handleCreateUserSubmit = async (values: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    if (values.email.length === 0 || values.password.length === 0) return;
+    setIsLoading(true);
+    try {
+      await signUpWithEmailPassword({
+        email: values.email,
+        password: values.password,
+        displayName: values.name,
+      });
+      setIsLoading(false);
+      // router.dismiss();
+    } catch (err) {
+      setIsLoading(false);
+      const message =
+        err instanceof Error ? err.message : 'Please try again and if the error continues contact R.Mend for help.';
+      Alert.alert('An error occurred while creating your account', message, [
+        { text: 'Ok', style: 'cancel' },
+      ]);
     }
   };
 
@@ -149,8 +144,6 @@ function CreateUserScreen() {
     </SafeAreaView>
   );
 }
-
-export default connect(null, { userSignedIn })(CreateUserScreen);
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().label('Name').required('Please enter your full name'),

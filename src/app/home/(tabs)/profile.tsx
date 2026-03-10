@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { useNavigation, useRouter } from 'expo-router';
+import { useNavigation } from 'expo-router';
 
-import { firebaseApp, signOut, updateProfile, getAuthority } from '@/config/FirebaseApp';
+import { updateProfile, getAuthority } from '@/config/FirebaseApp';
 import { connect } from 'react-redux';
 import { getUserInfo, userSignedOut } from '@/redux/actions';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { useAuth } from '@/hooks/useAuth';
 
 
 interface ProfileScreenProps {
@@ -25,58 +26,55 @@ interface ProfileScreenProps {
 }
 
 function ProfileScreen(props: ProfileScreenProps) {
-  const [user, setUser] = React.useState({
-    displayName: null,
-    email: null,
-    phoneNumber: null,
-    authCode: '',
-  });
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [navigationListener, setNavigationListener] = React.useState(null);
+  const [displayName, setDisplayName] = useState(props.user.displayName);
+  const [email, setEmail] = useState(props.user.email);
+  const [_, setPhoneNumber] = useState(props.user.phoneNumber); // phone number is currently not being used
+  const [authCode, setAuthCode] = useState(props.user.authCode);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
-  const router = useRouter();
+  const { user, signOut } = useAuth();
 
-  React.useEffect(() => {
-    const listener = navigation.addListener('focus', async () => {
-      if (firebaseApp.auth().currentUser !== null) {
-        if (user.displayName === null) {
+  useEffect(() => {
+    if (navigation.isFocused() && user !== null) {
+        if (displayName === null) {
           setIsLoading(true);
-          await props.getUserInfo();
-          setUser(props.user);
-          setIsLoading(false);
+          props.getUserInfo().then(() => {
+            setIsLoading(false);
+          });
         }
       }
-    });
-    setNavigationListener(listener);
-  });
+  }, [navigation]);
 
-  React.useEffect(() => {
-    return () => {
-      if (navigationListener) {
-        navigationListener();
-      }
-    };
-  }, [navigationListener]);
+  useEffect(() => {
+    updateProfileFields();
+  }, [props.user]);
+
+  const updateProfileFields = () => {
+    setEmail(props.user.email);
+    setDisplayName(props.user.displayName);
+    setPhoneNumber(props.user.phoneNumber);
+    setAuthCode(props.user.authCode);
+  }
+
+  const clearProfileFields = () => {
+    setEmail(null);
+    setDisplayName(null);
+    setPhoneNumber(null);
+    setAuthCode(null);
+  }
 
   const signUserOut = async () => {
-    await signOut();
     await props.userSignedOut();
-    setUser({
-      displayName: null,
-      email: null,
-      phoneNumber: null,
-      authCode: '',
-    });
+    clearProfileFields();
     setIsLoading(false);
-    router.replace('/auth/signin');
+    signOut();
   };
 
   const handleSignInOutPress = () => {
-    if (firebaseApp.auth().currentUser != null) {
-      signUserOut();
+    if (user != null) {
+      signOut();
     }
-    router.replace('/auth/signin');
   };
 
   const updateProfileAlert = () => {
@@ -84,7 +82,7 @@ function ProfileScreen(props: ProfileScreenProps) {
       {
         text: 'Cancel',
         style: 'cancel',
-        onPress: () => setUser(props.user),
+        onPress: () => updateProfileFields(),
       },
       { text: 'Ok', onPress: () => updateCloudProfile() },
     ]);
@@ -140,7 +138,7 @@ function ProfileScreen(props: ProfileScreenProps) {
   };
 
   const updateCloudProfile = async () => {
-    if (firebaseApp.auth().currentUser != null) {
+    if (user != null) {
       const errors = await validate();
       const shouldUpdateAuthCode = props.user.authCode == user.authCode ? false : true;
       if (Object.values(errors).length == 0) {
@@ -155,8 +153,7 @@ function ProfileScreen(props: ProfileScreenProps) {
                 style: 'cancel',
                 onPress: () => {
                   setIsLoading(false);
-                  setUser(props.user);
-                  
+                  updateProfileFields();
                 },
               },
               {
@@ -191,7 +188,7 @@ function ProfileScreen(props: ProfileScreenProps) {
           } else {
             await props.getUserInfo();
             setIsLoading(false);
-            setUser(props.user);
+            updateProfileFields();
           }
         }
       }
@@ -215,8 +212,8 @@ function ProfileScreen(props: ProfileScreenProps) {
           <Text style={styles.inputLabel}>Name</Text>
           <TextInput
             style={styles.input}
-            value={user.displayName}
-            onChangeText={(text) => setUser({ ...user, displayName: text })}
+            value={displayName}
+            onChangeText={(text) => setDisplayName(text)}
             keyboardAppearance="dark"
           />
         </View>
@@ -224,8 +221,8 @@ function ProfileScreen(props: ProfileScreenProps) {
           <Text style={styles.inputLabel}>Email</Text>
           <TextInput
             style={styles.input}
-            value={user.email}
-            onChangeText={(text) => setUser({ ...user, email: text })}
+            value={email}
+            onChangeText={(text) => setEmail(text)}
             keyboardAppearance="dark"
             keyboardType="email-address"
           />
@@ -246,8 +243,8 @@ function ProfileScreen(props: ProfileScreenProps) {
           <Text style={{ ...styles.inputLabel, width: wp('35%') }}>Authority Code</Text>
           <TextInput
             style={{ ...styles.input, width: wp('45%') }}
-            value={user.authCode}
-            onChangeText={(text) => setUser({ ...user, authCode: text })}
+            value={authCode}
+            onChangeText={(text) => setAuthCode(text)}
             placeholder="Optional"
             placeholderTextColor="#555"
             keyboardAppearance="dark"
@@ -267,7 +264,7 @@ function ProfileScreen(props: ProfileScreenProps) {
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => handleSignInOutPress()}>
           <Text style={{ fontSize: wp('6%'), color: 'white', fontWeight: 'bold' }}>
-            {firebaseApp.auth().currentUser != null ? 'Sign Out' : 'Sign In'}
+            {user != null ? 'Sign Out' : 'Sign In'}
           </Text>
         </TouchableOpacity>
       </View>

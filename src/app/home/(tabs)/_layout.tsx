@@ -7,9 +7,6 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import { firebaseApp } from '@/config/FirebaseApp';
-
-
 export default function HomeLayout() {
   return (
     <Tabs
@@ -78,14 +75,6 @@ export default function HomeLayout() {
             </View>
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            if (firebaseApp.auth().currentUser === null) {
-              // e.preventDefault();
-              navigation.navigate('signin');
-            }
-          },
-        })}
       />
     </Tabs>
   );
