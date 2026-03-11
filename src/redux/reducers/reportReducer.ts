@@ -14,7 +14,7 @@ import {
 const INITIAL_STATE = {
   images: [],
   county: '',
-  authority: { authCode: '', name: '', type: '' },
+  authority: { name: '', type: '' },
   location: { latitude: 37.78825, longitude: -122.4324 },
   details: { type: null, details: null, iconName: null },
   senderInfo: { name: null, email: null, phoneNumber: null },

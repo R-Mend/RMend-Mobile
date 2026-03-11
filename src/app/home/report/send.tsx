@@ -22,7 +22,7 @@ interface ReportSendScreenProps {
     details: any;
     senderInfo: any;
     location: { latitude: any, longitude: any },
-    authority: { authCode: any, name: any, type: any },
+    authority: { name: any, type: any },
     isLoading: boolean;
     info: any;
   };

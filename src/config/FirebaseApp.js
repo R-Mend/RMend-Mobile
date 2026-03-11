@@ -27,18 +27,11 @@ async function getBlobAsync(uri) {
   return blob;
 }
 
-export const updateProfile = async (
-  { displayName, email, authCode, phoneNumber },
-  shouldUpdateAuthCode
-) => {
+export const updateProfile = async ({ displayName, email, phoneNumber }) => {
   const { currentUser } = firebaseApp.auth();
   try {
     await currentUser.updateProfile({ displayName });
     await currentUser.updateEmail(email);
-
-    if (shouldUpdateAuthCode) {
-      await updateAuthCode(authCode);
-    }
 
     // if (phoneNumber) {
     //   formatted_phone = '+1' + phoneNumber.replace(/\D/g, '');
@@ -47,7 +40,7 @@ export const updateProfile = async (
 
     const user = await firebaseApp.firestore().collection('users').doc(currentUser.uid);
     if (user) {
-      await user.update({ displayName, email, authCode });
+      await user.update({ displayName, email });
     }
 
     return { result: 'Profile Successfully Updated' };
@@ -61,7 +54,7 @@ export const createReport = async ({
   details,
   senderInfo,
   location: { latitude, longitude },
-  authority: { authCode, name, type },
+  authority: { name },
 }) => {
   const date = new Date();
   const timestamp = date.toDateString();
@@ -71,7 +64,6 @@ export const createReport = async ({
     timestamp: timestamp,
     details: { ...details, authority: name },
     senderInfo,
-    authCode,
     geoData: geoPoint.data,
   };
 
@@ -102,16 +94,6 @@ export const createReport = async ({
   }
 };
 
-export const updateAuthCode = async (newAuthCode) => {
-  try {
-    const updateUserAuthCode = await firebaseApp.functions().httpsCallable('updateUserAuthCode');
-    const results = await updateUserAuthCode({ authCode: newAuthCode });
-    return results;
-  } catch (err) {
-    return { error: err.message };
-  }
-};
-
 export const makeAdminFrom = async (userId) => {
   try {
     const makeUserAdmin = await firebaseApp.functions().httpsCallable('makeUserAdmin');
@@ -136,30 +118,6 @@ export const getIssueGroups = async (county) => {
     });
     return issueGroups;
   } catch (err) {
-    return { error: err.message };
-  }
-};
-
-export const getAuthority = async (authCode) => {
-  try {
-    var querySnapshot = await firebaseApp
-      .firestore()
-      .collection('authorities')
-      .where('authCode', '==', authCode)
-      .get();
-
-    const reports = [];
-    querySnapshot.forEach((doc) => {
-      reports.push(doc.data());
-    });
-
-    if (reports.length == 0 || reports.length > 1) {
-      throw Error("Couldn't find authority from the given authority code.");
-    } else {
-      return { result: reports[0] };
-    }
-  } catch (err) {
-    console.log(err);
     return { error: err.message };
   }
 };

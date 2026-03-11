@@ -81,9 +81,7 @@ export const stopUpload = () => (dispatch) => {
 
 export const getUserInfo = () => async (dispatch) => {
   const { displayName, email } = firebaseApp.auth().currentUser;
-  const idTokenResult = await firebaseApp.auth().currentUser.getIdTokenResult(true);
-  const authCode = await idTokenResult.claims.authCode;
-  dispatch({ type: GET_USER_INFO, payload: { displayName, email, authCode } });
+  dispatch({ type: GET_USER_INFO, payload: { displayName, email } });
 };
 
 export const userSignedIn = () => async (dispatch) => {
