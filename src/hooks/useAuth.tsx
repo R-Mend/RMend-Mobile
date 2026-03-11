@@ -7,11 +7,13 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import type { FirebaseAuthTypes } from 'firebase/compat/auth';
 
-import { authClient } from '@/services/authClient';
+import { FirebaseAuthClient } from '@/services/auth/FirebaseAuthClient';
+import IUser from '@/models/auth/IUser';
 
-export type AuthUser = FirebaseAuthTypes.User | null;
+const authClient = FirebaseAuthClient;
+
+export type AuthUser = IUser | null;
 
 export type AuthState = {
   user: AuthUser;
@@ -25,14 +27,11 @@ export type EmailPasswordCredentials = {
 };
 
 export type UseAuthReturn = AuthState & {
-  signInWithEmailPassword: (
-    credentials: EmailPasswordCredentials
-  ) => Promise<{ user: AuthUser } | null>;
-  signUpWithEmailPassword: (
-    credentials: EmailPasswordCredentials & { displayName: string }
-  ) => Promise<{ user: AuthUser } | null>;
+  signInWithEmailPassword: (credentials: EmailPasswordCredentials) => Promise<void>;
+  signUpWithEmailPassword: (credentials: EmailPasswordCredentials & { displayName: string }) => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (profile: { displayName?: string; email?: string; }) => Promise<void>;
 };
 
 const AuthContext = createContext<UseAuthReturn | undefined>(undefined);
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const unsubscribe = authClient.onAuthStateChanged(
-      (user: AuthUser) => {
+      (user) => {
         setUser(user);
         setInitializing(false);
       },
@@ -65,12 +64,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     async ({ email, password }: EmailPasswordCredentials) => {
       setError(null);
       try {
-        const credential = await authClient.signInWithEmailAndPassword(
-          email,
-          password
-        );
-        setUser(credential.user);
-        return credential;
+        await authClient.signInWithEmailAndPassword(email, password);
+        // User state is updated via onAuthStateChanged
       } catch (err) {
         setError(err as Error);
         throw err;
@@ -83,13 +78,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     async ({ email, password, displayName }: EmailPasswordCredentials & { displayName: string }) => {
       setError(null);
       try {
-        const credential = await authClient.createUserWithEmailAndPassword(
-          email,
-          password,
-          displayName
-        );
-        setUser(credential.user);
-        return credential;
+        await authClient.createUserWithEmailAndPassword(email, password, displayName);
+        // User state is updated via onAuthStateChanged
       } catch (err) {
         setError(err as Error);
         throw err;
@@ -119,6 +109,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
+  const updateProfile = async ({ email, displayName }: { displayName?: string; email?: string; }) => {
+      if (!user) return;
+      setError(null);
+      try {
+        const nextUser: IUser = {
+          uid: user.uid,
+          displayName: displayName ?? user.displayName,
+          email: email ?? user.email,
+          phoneNumber: user.phoneNumber,
+        };
+
+        await authClient.updateUserProfile(nextUser);
+
+        // Update was successfil
+        console.log('User Profile Updated', nextUser)
+        setUser(nextUser);
+      } catch (err) {
+        setError(err as Error);
+        throw err;
+      }
+    };
+
   const value = useMemo<UseAuthReturn>(
     () => ({
       user,
@@ -128,6 +140,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       signUpWithEmailPassword,
       sendPasswordResetEmail,
       signOut,
+      updateProfile,
     }),
     [
       user,
@@ -137,6 +150,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       signUpWithEmailPassword,
       sendPasswordResetEmail,
       signOut,
+      updateProfile,
     ]
   );
 
