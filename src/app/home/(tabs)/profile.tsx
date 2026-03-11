@@ -5,72 +5,32 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { useNavigation } from 'expo-router';
 
-import { updateProfile, getAuthority } from '@/config/FirebaseApp';
-import { connect } from 'react-redux';
-import { getUserInfo, userSignedOut } from '@/redux/actions';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/hooks/useAuth';
 
 
-interface ProfileScreenProps {
-  getUserInfo: () => Promise<void>;
-  userSignedOut: () => Promise<void>;
-  user: {
-    displayName: string | null;
-    email: string | null;
-    phoneNumber: string | null;
-  };
-}
-
-function ProfileScreen(props: ProfileScreenProps) {
-  const [displayName, setDisplayName] = useState(props.user.displayName);
-  const [email, setEmail] = useState(props.user.email);
-  const [_, setPhoneNumber] = useState(props.user.phoneNumber); // phone number is currently not being used
+export default function ProfileScreen() {
+  const [displayName, setDisplayName] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const navigation = useNavigation();
-  const { user, signOut } = useAuth();
-
-  useEffect(() => {
-    if (navigation.isFocused() && user !== null) {
-        if (displayName === null) {
-          setIsLoading(true);
-          props.getUserInfo().then(() => {
-            setIsLoading(false);
-          });
-        }
-      }
-  }, [navigation]);
+  const { user, signOut, updateProfile } = useAuth();
 
   useEffect(() => {
     updateProfileFields();
-  }, [props.user]);
+  }, [user]);
 
   const updateProfileFields = () => {
     setEmail(user.email);
     setDisplayName(user.displayName);
-    setPhoneNumber(props.user.phoneNumber);
+    setPhoneNumber(user.phoneNumber);
   }
-
-  const clearProfileFields = () => {
-    setEmail(null);
-    setDisplayName(null);
-    setPhoneNumber(null);
-  }
-
-  const signUserOut = async () => {
-    setIsLoading(true);
-    await props.userSignedOut();
-    clearProfileFields();
-    setIsLoading(false);
-    signOut();
-  };
 
   const handleSignInOutPress = () => {
     if (user != null) {
-      signUserOut();
+      signOut();
     }
   };
 
@@ -85,30 +45,34 @@ function ProfileScreen(props: ProfileScreenProps) {
     ]);
   };
 
-  const validate = async () => { // TODO: Update this to use Formik validation schema like other screens
+  // TODO: Update this to use Formik validation schema like other screens
+  const validate = async () => {
     interface IValidationErrors {
       displayName?: string
       email?: string;
       phone?: string
     }
+
     const validEmailReg = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
     let errors: IValidationErrors = {};
-    if (!user.displayName) {
+
+    if (!displayName) {
       errors.displayName = 'Name is required';
       Alert.alert('Full Name is Required', 'Make sure you entered your full name and try again.', [
         { text: 'Ok' },
       ]);
-    } else if (!user.email || user.email.match(validEmailReg) == null) {
+    }
+    
+    if (!email || email == null || email.match(validEmailReg) == null) {
       errors.email = 'Email is required';
       Alert.alert(
         'Invalid Email Address',
         'Make sure you entered your email correctly and try again.',
         [{ text: 'Ok' }]
       );
-    } else if (
-      user.phoneNumber &&
-      !user.phoneNumber.match(/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/)
-    ) {
+    }
+    
+    if (phoneNumber && phoneNumber.match(/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/)) {
       errors.phone = 'Invalid Phone Number';
       Alert.alert(
         'Invalid Phone Number',
@@ -116,6 +80,7 @@ function ProfileScreen(props: ProfileScreenProps) {
         [{ text: 'Ok' }]
       );
     }
+
     return errors;
   };
 
@@ -124,19 +89,17 @@ function ProfileScreen(props: ProfileScreenProps) {
       const errors = await validate();
       if (Object.values(errors).length == 0) {
         setIsLoading(true);
-        const results = await updateProfile(user, false);
-        if (results.error) {
+        try {
+          await updateProfile({ displayName, email });
+          setIsLoading(false);
+        } catch (error) {
           Alert.alert(
             'An error occurred updating your account',
             'Please try again and if this error continues report it to R.Mend',
             [{ text: 'Ok' }]
           );
-          console.log(results.error);
+          console.log(error);
           setIsLoading(false);
-        } else {
-          await props.getUserInfo();
-          setIsLoading(false);
-          updateProfileFields();
         }
       }
     } else {
@@ -206,12 +169,6 @@ function ProfileScreen(props: ProfileScreenProps) {
     </SafeAreaView>
   );
 }
-
-const mapStateToProps = ({ user }) => {
-  return { user };
-};
-
-export default connect(mapStateToProps, { getUserInfo, userSignedOut })(ProfileScreen);
 
 const styles = StyleSheet.create({
   container: {
