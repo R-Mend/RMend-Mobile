@@ -66,12 +66,10 @@ export const FirebaseAuthClient: IAuthClient = {
     const { displayName, email } = user;
 
     if (displayName != null) {
-      console.log('Updating DisplayName')
       await updateProfile(auth.currentUser, { displayName });
     }
 
     if (email != null) {
-      console.log('Updating Email')
       await updateEmail(auth.currentUser, email);
     }
 

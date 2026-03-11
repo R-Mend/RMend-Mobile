@@ -27,28 +27,6 @@ async function getBlobAsync(uri) {
   return blob;
 }
 
-export const updateProfile = async ({ displayName, email, phoneNumber }) => {
-  const { currentUser } = firebaseApp.auth();
-  try {
-    await currentUser.updateProfile({ displayName });
-    await currentUser.updateEmail(email);
-
-    // if (phoneNumber) {
-    //   formatted_phone = '+1' + phoneNumber.replace(/\D/g, '');
-    //   currentUser.updatePhoneNumber(formatted_phone);
-    // }
-
-    const user = await firebaseApp.firestore().collection('users').doc(currentUser.uid);
-    if (user) {
-      await user.update({ displayName, email });
-    }
-
-    return { result: 'Profile Successfully Updated' };
-  } catch (err) {
-    return { error: err.message };
-  }
-};
-
 export const createReport = async ({
   images,
   details,
@@ -89,16 +67,6 @@ export const createReport = async ({
       });
     }
     return { result: 'Report Successfuly Uploaded' };
-  } catch (err) {
-    return { error: err.message };
-  }
-};
-
-export const makeAdminFrom = async (userId) => {
-  try {
-    const makeUserAdmin = await firebaseApp.functions().httpsCallable('makeUserAdmin');
-    const results = await makeUserAdmin({ userId });
-    return results;
   } catch (err) {
     return { error: err.message };
   }

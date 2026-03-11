@@ -123,7 +123,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         await authClient.updateUserProfile(nextUser);
 
         // Update was successfil
-        console.log('User Profile Updated', nextUser)
         setUser(nextUser);
       } catch (err) {
         setError(err as Error);
