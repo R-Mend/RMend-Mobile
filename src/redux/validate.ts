@@ -18,9 +18,6 @@ const validate = (values) => {
   if (!values.details.type) {
     errors.type = 'Required';
   }
-  if (values.authority.authCode == '') {
-    errors.authority = 'Required';
-  }
   if (!values.senderInfo.name) {
     errors.name = 'Required';
   }

@@ -21,7 +21,6 @@ interface ProfileScreenProps {
     displayName: string | null;
     email: string | null;
     phoneNumber: string | null;
-    authCode: string;
   };
 }
 
@@ -29,7 +28,6 @@ function ProfileScreen(props: ProfileScreenProps) {
   const [displayName, setDisplayName] = useState(props.user.displayName);
   const [email, setEmail] = useState(props.user.email);
   const [_, setPhoneNumber] = useState(props.user.phoneNumber); // phone number is currently not being used
-  const [authCode, setAuthCode] = useState(props.user.authCode);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
@@ -54,14 +52,12 @@ function ProfileScreen(props: ProfileScreenProps) {
     setEmail(user.email);
     setDisplayName(user.displayName);
     setPhoneNumber(props.user.phoneNumber);
-    setAuthCode(props.user.authCode);
   }
 
   const clearProfileFields = () => {
     setEmail(null);
     setDisplayName(null);
     setPhoneNumber(null);
-    setAuthCode(null);
   }
 
   const signUserOut = async () => {
@@ -94,10 +90,8 @@ function ProfileScreen(props: ProfileScreenProps) {
       displayName?: string
       email?: string;
       phone?: string
-      authCode?: string;
     }
     const validEmailReg = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-    const shouldUpdateAuthCode = props.user.authCode == user.authCode ? false : true;
     let errors: IValidationErrors = {};
     if (!user.displayName) {
       errors.displayName = 'Name is required';
@@ -121,19 +115,6 @@ function ProfileScreen(props: ProfileScreenProps) {
         'Make sure you entered the number in a proper format (2705908539) and try again.',
         [{ text: 'Ok' }]
       );
-    } else if (shouldUpdateAuthCode) {
-      const results = await getAuthority(user.authCode);
-      if (
-        (results.error || user.authCode.match(/\S\s/) || user.authCode.match(/\s\S/)) &&
-        user.authCode.replace(/\s/g, '').length > 0
-      ) {
-        errors.authCode = 'Invalid Authority Code';
-        Alert.alert(
-          'Invalid Authority Code',
-          'Make sure you entered the code correctly and try again.',
-          [{ text: 'Ok' }]
-        );
-      }
     }
     return errors;
   };
@@ -141,56 +122,21 @@ function ProfileScreen(props: ProfileScreenProps) {
   const updateCloudProfile = async () => {
     if (user != null) {
       const errors = await validate();
-      const shouldUpdateAuthCode = props.user.authCode == user.authCode ? false : true;
       if (Object.values(errors).length == 0) {
         setIsLoading(true);
-        if (shouldUpdateAuthCode) {
-          await Alert.alert(
-            'Sign Out Required',
-            'Updating your authority code requires you to sign out.',
-            [
-              {
-                text: 'Cancel',
-                style: 'cancel',
-                onPress: () => {
-                  setIsLoading(false);
-                  updateProfileFields();
-                },
-              },
-              {
-                text: 'Ok',
-                onPress: async () => {
-                  var result = await updateProfile(user, true);
-                  if (result.error) {
-                    Alert.alert(
-                      'An error occurred updating your account',
-                      'Please try again and if this error continues report it to R.Mend',
-                      [{ text: 'Ok' }]
-                    );
-                    console.log(result.error);
-                    setIsLoading(false);
-                  } else {
-                    signUserOut();
-                  }
-                },
-              },
-            ]
+        const results = await updateProfile(user, false);
+        if (results.error) {
+          Alert.alert(
+            'An error occurred updating your account',
+            'Please try again and if this error continues report it to R.Mend',
+            [{ text: 'Ok' }]
           );
+          console.log(results.error);
+          setIsLoading(false);
         } else {
-          const results = await updateProfile(user, false);
-          if (results.error) {
-            Alert.alert(
-              'An error occurred updating your account',
-              'Please try again and if this error continues report it to R.Mend',
-              [{ text: 'Ok' }]
-            );
-            console.log(results.error);
-            setIsLoading(false);
-          } else {
-            await props.getUserInfo();
-            setIsLoading(false);
-            updateProfileFields();
-          }
+          await props.getUserInfo();
+          setIsLoading(false);
+          updateProfileFields();
         }
       }
     } else {
@@ -240,18 +186,6 @@ function ProfileScreen(props: ProfileScreenProps) {
             keyboardType="phone-pad"
           />
         </View> */}
-        <View style={styles.inputWrapper}>
-          <Text style={{ ...styles.inputLabel, width: wp('35%') }}>Authority Code</Text>
-          <TextInput
-            style={{ ...styles.input, width: wp('45%') }}
-            value={authCode}
-            onChangeText={(text) => setAuthCode(text)}
-            placeholder="Optional"
-            placeholderTextColor="#555"
-            keyboardAppearance="dark"
-            secureTextEntry
-          />
-        </View>
         {/* <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Address</Text>
           <TextInput style={styles.input} />
