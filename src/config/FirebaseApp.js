@@ -4,9 +4,9 @@ import 'firebase/compat/firestore';
 import 'firebase/compat/storage';
 import 'firebase/compat/functions';
 import * as geofirex from 'geofirex';
-import { FIREBASE_DEV_CONFIG } from './keys';
 
-export const firebaseApp = firebase.initializeApp(FIREBASE_DEV_CONFIG);
+import { app as firebaseApp } from '../services/firebase';
+
 export const geo = geofirex.init(firebase);
 
 async function getBlobAsync(uri) {
