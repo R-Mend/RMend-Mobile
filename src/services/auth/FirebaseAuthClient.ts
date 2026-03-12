@@ -1,7 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import {
-  getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -10,13 +8,9 @@ import {
   User,
 } from 'firebase/auth';
 
-import { FIREBASE_DEV_CONFIG } from '@/config/keys';
+import { auth, db } from '@/services/firebase';
 import IAuthClient from '@/models/auth/IAuthClient';
 import IUser from '@/models/auth/IUser'
-
-const app = initializeApp(FIREBASE_DEV_CONFIG);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 function toIUser(firebaseUser: User): IUser {
   return {
