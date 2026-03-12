@@ -6,14 +6,13 @@ import {
 } from 'react-native-responsive-screen';
 import { connect } from 'react-redux';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 
-import { getIssueGroups } from '@/config/FirebaseApp';
 import { updateDetails, resetReport } from '@/redux/actions';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
-
+import { FirebaseCountyClient } from '@/services/county/FirebaseCountyClient';
 
 interface ReportDetailsScreenProps {
   details: any;
@@ -26,32 +25,18 @@ interface ReportDetailsScreenProps {
 function ReportDetailsScreen(props: ReportDetailsScreenProps) {
   const { county, details, updateDetails, resetReport, isLoading } = props;
   const [issueGroups, setIssueGroups] = React.useState([]);
-  const [currentCounty, setCurrentCounty] = React.useState('');
-  const [navigationListener, setNavigationListener] = React.useState(null);
+  const [previousCounty, setPreviousCounty] = React.useState('');
 
-  const navigation = useNavigation();
   const router = useRouter();
 
   useEffect(() => {
-    setNavigationListener(
-      navigation.addListener('focus', async () => {
-        if (currentCounty !== county) {
-          await getIssueTypes();
-        }
-      })
-    );
-  }, [props.county]);
-
-  useEffect(() => {
-    return () => {
-      if (navigationListener) {
-        navigationListener.remove();
-      }
-    };
-  }, [navigationListener]);
+    if (county && county != previousCounty) {
+      getIssueTypes();
+    }
+  }, [county]);
 
   const getIssueTypes = async () => {
-    const issueGroups = await getIssueGroups(props.county);
+    const issueGroups = await FirebaseCountyClient.getIssueGroups(props.county);
     if (issueGroups.length == 0) {
       Alert.alert(
         'Failed to load incidents',
@@ -63,7 +48,7 @@ function ReportDetailsScreen(props: ReportDetailsScreenProps) {
       );
     }
     setIssueGroups(issueGroups);
-    setCurrentCounty(props.county);
+    setPreviousCounty(county);
   };
 
   return (
