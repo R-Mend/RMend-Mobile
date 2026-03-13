@@ -1,15 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
 
-import reportReducer from './reducers/reportReducer';
-import authReducer from './reducers/authReducer';
+import reportReducer from './features/reportSlice';
 
 // Automatically adds the thunk middleware and the Redux DevTools extension
-const store = configureStore({
+export const store = configureStore({
     // Automatically calls `combineReducers`
     reducer: {
         report: reportReducer,
-        user: authReducer,
     }
 });
 
-export default store;
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<typeof store.getState>
+// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+export type AppDispatch = typeof store.dispatch
