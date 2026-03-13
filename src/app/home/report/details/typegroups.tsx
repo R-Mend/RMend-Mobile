@@ -9,7 +9,7 @@ import { Entypo } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 
-function ReportTypeGroupsScreen() {
+export default function ReportTypeGroupsScreen() {
   const router = useRouter();
   const { issueGroups } = useLocalSearchParams(); // TODO: replace with state management due to expo-router limitations
   
@@ -39,8 +39,6 @@ function ReportTypeGroupsScreen() {
     </SafeAreaView>
   );
 }
-
-export default ReportTypeGroupsScreen;
 
 const styles = StyleSheet.create({
   container: {

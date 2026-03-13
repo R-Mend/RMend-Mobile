@@ -1,59 +1,44 @@
 import React from 'react';
 import { Text, StyleSheet, ScrollView, View, Alert, Image, TextInput } from 'react-native';
-import { connect } from 'react-redux';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { updateSenderInfo, resetReport, startUpload, stopUpload } from '@/redux/actions';
+import { updateSenderInfo, resetReport } from '@/redux/features/reportSlice';
 import { createReport } from '@/config/FirebaseApp';
 import validate from '@/redux/validate';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 
-interface ReportSendScreenProps {
-  report: {
-    images: any[];
-    details: any;
-    senderInfo: any;
-    location: { latitude: any, longitude: any },
-    authority: { name: any, type: any },
-    isLoading: boolean;
-    info: any;
-  };
-  updateSenderInfo: (info: any) => void;
-  resetReport: () => void;
-  startUpload: () => void;
-  stopUpload: () => void;
-  updateInfo: (info: any) => void;
-}
-
-function ReportSendScreen(props: ReportSendScreenProps) {
-  const { report, updateSenderInfo, resetReport, startUpload, stopUpload, updateInfo } = props;
+export default function ReportSendScreen() {
   const [name, setName] = React.useState(null);
   const [email, setEmail] = React.useState(null);
   const [phoneNumber, setPhoneNumber] = React.useState(null);
+
+  const dispatch = useAppDispatch();
+  const report = useAppSelector((state) => state.report);
 
   const router = useRouter();
   const { user } = useAuth();
 
   React.useEffect(() => {
     if (user) {
-      updateSenderInfo({
+      dispatch(updateSenderInfo({
         name: user.displayName,
         email: user.email,
         phoneNumber: user.phoneNumber,
-      });
+      }));
       setName(user.displayName);
       setEmail(user.email);
       setPhoneNumber(user.phoneNumber);
     }
-  }, [updateSenderInfo, user]);
+  }, [user]);
 
   const sendReportAsync = async () => {
     const errors = validate(report);
@@ -64,7 +49,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
         [{ text: 'Ok', style: 'cancel' }]
       );
     } else {
-      startUpload();
+      // startUpload();
       const results = await createReport(report);
       if (results.error) {
         Alert.alert(
@@ -72,9 +57,9 @@ function ReportSendScreen(props: ReportSendScreenProps) {
           'Please try again and if the issue continues try uploading images with better connection.',
           [{ text: 'Ok' }]
         );
-        stopUpload();
+        // stopUpload();
       } else {
-        await resetReport();
+        await dispatch(resetReport());
         router.dismiss();
       }
     }
@@ -85,11 +70,10 @@ function ReportSendScreen(props: ReportSendScreenProps) {
       {report.isLoading && <LoadingOverlay />}
       <Header
         title="Send"
-        {...props}
         navTitleOne="Home"
         navTitleTwo="Send"
         navActionOne={() => {
-          resetReport();
+          dispatch(resetReport());
           router.dismiss();
         }}
         navActionTwo={() => {
@@ -140,7 +124,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
             <TextInput
               style={styles.input}
               value={name}
-              onChangeText={(text) => updateInfo({ ...report.info, name: text })}
+              onChangeText={(text) => dispatch(updateSenderInfo({ ...report.senderInfo, name: text }))}
               placeholder="Required"
               editable={false}
             />
@@ -150,7 +134,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
             <TextInput
               style={styles.input}
               value={email}
-              onChangeText={(text) => updateInfo({ ...report.info, email: text })}
+              onChangeText={(text) => dispatch(updateSenderInfo({ ...report.senderInfo, email: text }))}
               placeholder="Required"
               editable={false}
             />
@@ -160,7 +144,7 @@ function ReportSendScreen(props: ReportSendScreenProps) {
             <TextInput
               style={styles.input}
               value={phoneNumber}
-              onChangeText={(text) => updateInfo({ ...report.info, phoneNumber: text })}
+              onChangeText={(text) => dispatch(updateSenderInfo({ ...report.senderInfo, phoneNumber: text }))}
               placeholder="Optional"
               editable={false}
             />
@@ -181,15 +165,6 @@ function ReportSendScreen(props: ReportSendScreenProps) {
     </View>
   );
 }
-
-const mapStateToProps = ({ report }) => {
-  return {
-    report: report,
-  };
-};
-export default connect(mapStateToProps, { updateSenderInfo, resetReport, startUpload, stopUpload })(
-  ReportSendScreen
-);
 
 const styles = StyleSheet.create({
   container: {

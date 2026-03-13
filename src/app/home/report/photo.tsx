@@ -1,7 +1,6 @@
 import { StyleSheet, Text, Image, View, ScrollView, Alert } from 'react-native';
 import { ActionSheetIOS, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import { connect } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import React from 'react';
 import {
@@ -11,25 +10,19 @@ import {
 
 import Header from '@/components/Header';
 // import InfoMessage from '../../components/InfoMessage';
-import { addImage, removeImage, resetReport } from '@/redux/actions';
+import { addImage, removeImage, resetReport } from '@/redux/features/reportSlice';
 const imagesPlaceholder = '../../../assets/images/placeholder-dark.jpg';
-import LoadingOverlay from '@/components/LoadingOverlay';
+// import LoadingOverlay from '@/components/LoadingOverlay';
 import { useRouter } from 'expo-router';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
-
-interface ReportScreenProps {
-  images: string[];
-  addImage: (image: string) => void;
-  removeImage: (index: number) => void;
-  resetReport: () => void;
-  isLoading: boolean;
-}
-
-function ReportScreen(props: ReportScreenProps) {
-  const { images, addImage, removeImage, resetReport, isLoading } = props;
+export default function ReportScreen() {
+  const dispatch = useAppDispatch();
+  const images = useAppSelector((state) => state.report.images);
+  
   const router = useRouter();
 
-  // TODO: [Image Upload Lmit] consider adding a limit to the number of photos uploaded
+  // TODO: [Image Upload Limit] consider adding a limit to the number of photos uploaded
   // const [imageCount, setImageCount] = React.useState(0);
   // const [ready, setReady] = React.useState(false);
 
@@ -58,7 +51,7 @@ function ReportScreen(props: ReportScreenProps) {
       quality: 1,
     });
     if (!result.canceled) {
-      addImage(result.assets[0].uri);
+      dispatch(addImage(result.assets[0].uri));
     }
   };
 
@@ -70,7 +63,7 @@ function ReportScreen(props: ReportScreenProps) {
       base64: true,
     });
     if (!result.canceled) {
-      addImage(result.assets[0].uri);
+      dispatch(addImage(result.assets[0].uri));
     }
   };
 
@@ -100,14 +93,13 @@ function ReportScreen(props: ReportScreenProps) {
 
   return (
     <View style={styles.container}>
-      {isLoading && <LoadingOverlay />}
+      {/* {isLoading && <LoadingOverlay />} */}
       <Header
         title="Photos"
-        {...props}
         navTitleOne="Home"
         navTitleTwo="Next"
         navActionOne={() => {
-          resetReport();
+          dispatch(resetReport());
           router.dismiss();
         }}
         navActionTwo={() => router.navigate('/home/report/location')}
@@ -132,7 +124,7 @@ function ReportScreen(props: ReportScreenProps) {
               {/* <Image source={{ isStatic: true, uri: image }} style={styles.image} /> */}
               <Image source={{ uri: image }} style={styles.image} />
               <View style={styles.imageDeleteContainer}>
-                <TouchableOpacity style={styles.imageDelete} onPress={() => removeImage(index)}>
+                <TouchableOpacity style={styles.imageDelete} onPress={() => dispatch(removeImage(index))}>
                   <AntDesign name="delete" size={wp('5%')} color={'white'} />
                 </TouchableOpacity>
               </View>
@@ -148,14 +140,6 @@ function ReportScreen(props: ReportScreenProps) {
     </View>
   );
 }
-
-const mapStateToProps = ({ report }) => {
-  return {
-    images: report.images,
-    isLoading: report.isLoading,
-  };
-};
-export default connect(mapStateToProps, { addImage, removeImage, resetReport })(ReportScreen);
 
 const styles = StyleSheet.create({
   container: {

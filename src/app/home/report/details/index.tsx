@@ -4,30 +4,27 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { connect } from 'react-redux';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import { updateDetails, resetReport } from '@/redux/actions';
+import { updateDetails, resetReport } from '@/redux/features/reportSlice';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { FirebaseCountyClient } from '@/services/county/FirebaseCountyClient';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
-interface ReportDetailsScreenProps {
-  details: any;
-  updateDetails: (details: any) => void;
-  resetReport: () => void;
-  isLoading: boolean;
-  county: string;
-}
 
-function ReportDetailsScreen(props: ReportDetailsScreenProps) {
-  const { county, details, updateDetails, resetReport, isLoading } = props;
+export default function ReportDetailsScreen() {
   const [issueGroups, setIssueGroups] = React.useState([]);
   const [previousCounty, setPreviousCounty] = React.useState('');
 
+  const county = useAppSelector((state) => state.report.county);
+  const details = useAppSelector((state) => state.report.details);
+  const isLoading = useAppSelector((state) => state.report.isLoading);
+
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (county && county != previousCounty) {
@@ -36,7 +33,7 @@ function ReportDetailsScreen(props: ReportDetailsScreenProps) {
   }, [county]);
 
   const getIssueTypes = async () => {
-    const issueGroups = await FirebaseCountyClient.getIssueGroups(props.county);
+    const issueGroups = await FirebaseCountyClient.getIssueGroups(county);
     if (issueGroups.length == 0) {
       Alert.alert(
         'Failed to load incidents',
@@ -56,11 +53,10 @@ function ReportDetailsScreen(props: ReportDetailsScreenProps) {
       {isLoading && <LoadingOverlay />}
       <Header
         title="Details"
-        {...props}
         navTitleOne="Home"
         navTitleTwo="Next"
         navActionOne={() => {
-          resetReport();
+          dispatch(resetReport());
           router.dismiss();
         }}
         navActionTwo={() => router.navigate('/home/report/send')}
@@ -102,11 +98,7 @@ function ReportDetailsScreen(props: ReportDetailsScreenProps) {
         value={details.details}
         style={styles.details}
         onChangeText={(text) =>
-          updateDetails({
-            type: details.type,
-            details: text,
-            iconName: details.iconName,
-          })
+          dispatch(updateDetails({ type: details.type, details: text, iconName: details.iconName }))
         }
         placeholder="Enter a description of the incident"
         placeholderTextColor="#666"
@@ -116,15 +108,6 @@ function ReportDetailsScreen(props: ReportDetailsScreenProps) {
     </View>
   );
 }
-
-const mapStateToProps = ({ report }) => {
-  return {
-    county: report.county,
-    details: report.details,
-    isLoading: report.isLoading,
-  };
-};
-export default connect(mapStateToProps, { updateDetails, resetReport })(ReportDetailsScreen);
 
 const styles = StyleSheet.create({
   container: {

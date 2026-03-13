@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import { featureEach, booleanContains, point } from '@turf/turf';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { connect } from 'react-redux';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -11,25 +10,20 @@ import {
 
 import Header from '@/components/Header';
 import mapStyle from '@/constants/MapStyle';
-import { updateLocation, updateCounty, resetReport } from '@/redux/actions';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { updateLocation, updateCounty, resetReport } from '@/redux/features/reportSlice';
 import currentAuthJSON from '@/constants/json/current_rmend_counties.json' with { type: 'json' };
-import LoadingOverlay from '@/components/LoadingOverlay';
+// import LoadingOverlay from '@/components/LoadingOverlay';
 import { useRouter } from 'expo-router';
 
 
-interface ReportLocationScreenProps {
-  updateLocation: (location: { latitude: number; longitude: number }) => void;
-  updateCounty: (county: string) => void;
-  resetReport: () => void;
-  isLoading: boolean;
-  location: { latitude: number; longitude: number };
-}
-
-function ReportLocationScreen(props: ReportLocationScreenProps) {
-  const { location, resetReport, isLoading, updateLocation, updateCounty } = props;
+export default function ReportLocationScreen() {
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [latitude, setLatitude] = React.useState(null);
   const [longitude, setLongitude] = React.useState(null);
+  
+  const dispatch = useAppDispatch();
+  const location = useAppSelector((state) => state.report.location);
 
   const router = useRouter();
 
@@ -48,7 +42,7 @@ function ReportLocationScreen(props: ReportLocationScreenProps) {
 
   const updateRegion = (region) => {
     const { latitude, longitude } = region;
-    updateLocation({ latitude, longitude });
+    dispatch(updateLocation({ latitude, longitude }));
     updateReportsCounty(latitude, longitude);
   };
 
@@ -59,24 +53,23 @@ function ReportLocationScreen(props: ReportLocationScreenProps) {
       if (booleanContains(feature, coordinate)) {
         found = true;
         const county = feature.properties.NAME;
-        updateCounty(county);
+        dispatch(updateCounty(county));
       }
     });
     if (!found) {
-      updateCounty('');
+      dispatch(updateCounty(''));
     }
   };
 
   return (
     <View style={styles.scrollContainer}>
-      {isLoading && <LoadingOverlay />}
+      {/* {isLoading && <LoadingOverlay />} */}
       <Header
         title="Location"
-        {...props}
         navTitleOne="Home"
         navTitleTwo="Next"
         navActionOne={() => {
-          resetReport();
+          dispatch(resetReport());
           router.dismiss();
         }}
         navActionTwo={() => router.navigate('/home/report/details')}
@@ -118,16 +111,6 @@ function ReportLocationScreen(props: ReportLocationScreenProps) {
     </View>
   );
 }
-
-const mapStateToProps = ({ report }) => {
-  return {
-    location: report.location,
-    isLoading: report.isLoading,
-  };
-};
-export default connect(mapStateToProps, { updateLocation, resetReport, updateCounty })(
-  ReportLocationScreen
-);
 
 const styles = StyleSheet.create({
   scrollContainer: {

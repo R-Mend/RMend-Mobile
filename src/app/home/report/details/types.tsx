@@ -4,21 +4,16 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { connect } from 'react-redux';
 import { Entypo } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { updateDetails, updateAuthority } from '@/redux/actions';
+import { updateDetails, updateAuthority } from '@/redux/features/reportSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 
-interface ReportTypesScreenProps {
-  details: any;
-  updateDetails: (details: any) => void;
-  updateAuthority: (authority: any) => void;
-}
-
-function ReportTypesScreen(props: ReportTypesScreenProps) {
-  const { details, updateDetails, updateAuthority } = props;
+export default function ReportTypesScreen() {
+  const dispatch = useAppDispatch();
+  const details = useAppSelector((state) => state.report.details);
 
   const router = useRouter();
   const { types, iconName, authority } = useLocalSearchParams(); // TODO: replace with state management due to expo-router limitations
@@ -35,8 +30,8 @@ function ReportTypesScreen(props: ReportTypesScreenProps) {
               <TouchableOpacity
                 style={styles.selector}
                 onPress={() => {
-                  updateAuthority(authority);
-                  updateDetails({ ...details, type, iconName });
+                  dispatch(updateAuthority(authority));
+                  dispatch(updateDetails({ ...details, type, iconName }));
                   router.navigate('/home/report/details'); // TODO: replace with state management due to expo-router limitations
                 }}
               >
@@ -60,14 +55,6 @@ function ReportTypesScreen(props: ReportTypesScreenProps) {
     </View>
   );
 }
-
-const mapStateToProps = ({ report }) => {
-  return {
-    details: report.details,
-  };
-};
-
-export default connect(mapStateToProps, { updateDetails, updateAuthority })(ReportTypesScreen);
 
 const styles = StyleSheet.create({
   placeholder: {
