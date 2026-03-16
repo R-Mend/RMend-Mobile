@@ -14,12 +14,15 @@ import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { FirebaseCountyClient } from '@/services/county/FirebaseCountyClient';
+import IAuthority from '@/models/county/IAuthority';
 
 
 export default function ReportSendScreen() {
   const [name, setName] = React.useState(null);
   const [email, setEmail] = React.useState(null);
   const [phoneNumber, setPhoneNumber] = React.useState(null);
+  const [authority, setAuthority] = React.useState<IAuthority>(null);
 
   const dispatch = useAppDispatch();
   const report = useAppSelector((state) => state.report);
@@ -39,6 +42,16 @@ export default function ReportSendScreen() {
       setPhoneNumber(user.phoneNumber);
     }
   }, [user]);
+
+  React.useEffect(() => {
+    if (report.authorityId) {
+      FirebaseCountyClient.getAuthority(report.authorityId).then((authority) => {
+        if (authority) {
+          setAuthority(authority);
+        }
+      });
+    }
+  }, [report.authorityId]);
 
   const sendReportAsync = async () => {
     const errors = validate(report);
@@ -90,7 +103,7 @@ export default function ReportSendScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.header}>Authority</Text>
         <Text style={styles.subHeader}>This report will be sent to:</Text>
-        {report.authority.name != '' && (
+        {authority ? (
           <View style={styles.authInfoWrapper}>
             <View style={styles.authInfo}>
               <Image
@@ -98,13 +111,11 @@ export default function ReportSendScreen() {
                 style={styles.authInfoImage}
               />
               <View>
-                <Text style={styles.authInfoText}>{report.authority.name}</Text>
-                <Text style={styles.authInfoType}>{report.authority.type}</Text>
+                <Text style={styles.authInfoText}>{authority.name}</Text>
               </View>
             </View>
           </View>
-        )}
-        {report.authority.name == '' && (
+        ) : (
           <View style={styles.authInfoWrapper}>
             <View style={styles.authInfo}>
               <View>

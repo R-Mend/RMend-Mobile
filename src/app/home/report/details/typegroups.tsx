@@ -6,24 +6,25 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { Entypo } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { useAppSelector } from '@/redux/hooks';
 
 
 export default function ReportTypeGroupsScreen() {
   const router = useRouter();
-  const { issueGroups } = useLocalSearchParams(); // TODO: replace with state management due to expo-router limitations
-  
+  const issueGroups = useAppSelector((state) => state.report.issueGroups);
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         contentContainerStyle={styles.list}
         data={issueGroups}
         renderItem={(item) => {
-          const { name, types, iconName, authority } = item as any; // TODO: [backend wrapper] replace 'any' with proper type
+          const { name, iconName } = item.item;
           return (
             <TouchableOpacity
               style={styles.selector}
-              onPress={() => router.navigate({pathname: '/home/report/details/types', params: { types, iconName, authority }})}
+              onPress={() => router.navigate({pathname: '/home/report/details/types', params: { typeGroup: item.index }})}
             >
               <Entypo
                 name={iconName as any}

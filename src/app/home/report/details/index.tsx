@@ -7,7 +7,7 @@ import {
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import { updateDetails, resetReport } from '@/redux/features/reportSlice';
+import { updateDetails, resetReport, issueGroupsUpdated } from '@/redux/features/reportSlice';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
@@ -16,37 +16,41 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 
 export default function ReportDetailsScreen() {
-  const [issueGroups, setIssueGroups] = React.useState([]);
   const [previousCounty, setPreviousCounty] = React.useState('');
 
   const county = useAppSelector((state) => state.report.county);
   const details = useAppSelector((state) => state.report.details);
   const isLoading = useAppSelector((state) => state.report.isLoading);
+  const issueGroups = useAppSelector((state) => state.report.issueGroups);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (county && county != previousCounty) {
-      getIssueTypes();
+      getIssueGroups();
     }
   }, [county]);
 
-  const getIssueTypes = async () => {
+  const getIssueGroups = async () => {
     const issueGroups = await FirebaseCountyClient.getIssueGroups(county);
     if (issueGroups.length == 0) {
       Alert.alert(
         'Failed to load incidents',
         'Their was an issue loading incidents in your location. Please check your connection or if your county is using RMend and try again',
         [
-          { text: 'Ok', onPress: getIssueTypes },
+          { text: 'Ok', onPress: getIssueGroups },
           { text: 'Cancel', style: 'cancel' },
         ]
       );
     }
-    setIssueGroups(issueGroups);
+    dispatch(issueGroupsUpdated(issueGroups));
     setPreviousCounty(county);
   };
+
+  const handleIssueGroupPress = () => {
+    router.navigate('/home/report/details/typegroups');
+  }
 
   return (
     <View style={styles.container}>
@@ -67,7 +71,7 @@ export default function ReportDetailsScreen() {
         <TouchableOpacity
           style={styles.mainSelector}
           disabled={issueGroups.length > 0 ? false : true}
-          onPress={() => router.navigate({pathname: '/home/report/details/typegroups', params: { issueGroups }})} // TODO: replace with state management due to expo-router limitations
+          onPress={() => handleIssueGroupPress()}
         >
           <Text style={styles.selectorText}>
             {issueGroups.length > 0 ? 'Select the incident type' : 'Loading issue groups...'}
@@ -81,10 +85,10 @@ export default function ReportDetailsScreen() {
       {details.type && (
         <TouchableOpacity
           style={styles.selector}
-          onPress={() => router.navigate({pathname: '/home/report/details/typegroups', params: { issueGroups }})} // TODO: replace with state management due to expo-router limitations
+          onPress={() => handleIssueGroupPress()}
         >
           <Entypo
-            name={details.iconName}
+            name={details.iconName as any} // TODO: replace 'any' with converted icon type from backend
             size={wp('6%')}
             color="#ff6a30"
             style={{ marginLeft: wp('2%') }}
