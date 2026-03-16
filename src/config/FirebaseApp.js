@@ -32,7 +32,7 @@ export const createReport = async ({
   details,
   senderInfo,
   location: { latitude, longitude },
-  authority: { name },
+  authorityId,
 }) => {
   const date = new Date();
   const timestamp = date.toDateString();
@@ -40,7 +40,7 @@ export const createReport = async ({
   const data = {
     location: { latitude, longitude },
     timestamp: timestamp,
-    details: { ...details, authority: name },
+    details: { ...details, authorityId },
     senderInfo,
     geoData: geoPoint.data,
   };

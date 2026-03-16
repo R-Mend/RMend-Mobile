@@ -1,13 +1,37 @@
+import { IIssueGroup } from '@/models/county/ICounty'
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = {
+export type ReportState = {
+    images: string[],
+    county: string,
+    authorityId: string,
+    location: {
+        longitude: number,
+        latitude: number
+    },
+    details: {
+        type: string,
+        details: string,
+        iconName: string
+    },
+    senderInfo: {
+        name: string,
+        email: string,
+        phoneNumber: string,
+    },
+    isLoading: boolean,
+    issueGroups: IIssueGroup[]
+}
+
+const initialState: ReportState = {
     images: [],
     county: '',
-    authority: { name: '', type: '' },
+    authorityId: '',
     location: { latitude: 37.78825, longitude: -122.4324 },
     details: { type: null, details: null, iconName: null },
     senderInfo: { name: null, email: null, phoneNumber: null },
     isLoading: false,
+    issueGroups: []
 };
 
 const reportSlice = createSlice({
@@ -40,8 +64,12 @@ const reportSlice = createSlice({
             state.county = payload;
         },
 
-        updateAuthority(state, { payload }) {
-            state.authority = payload;
+        authorityIdUpdated(state, { payload }) {
+            state.authorityId = payload;
+        },
+
+        issueGroupsUpdated(state, { payload }) {
+            state.issueGroups = payload;
         }
     }
 });
@@ -54,7 +82,8 @@ export const {
     updateDetails,
     updateSenderInfo,
     updateCounty,
-    updateAuthority
+    authorityIdUpdated,
+    issueGroupsUpdated
 } = reportSlice.actions
 
 export default reportSlice.reducer;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, StyleSheet, TouchableOpacity, FlatList, View } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -7,7 +7,7 @@ import {
 import { Entypo } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { updateDetails, updateAuthority } from '@/redux/features/reportSlice';
+import { updateDetails, authorityIdUpdated } from '@/redux/features/reportSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 
@@ -16,11 +16,22 @@ export default function ReportTypesScreen() {
   const details = useAppSelector((state) => state.report.details);
 
   const router = useRouter();
-  const { types, iconName, authority } = useLocalSearchParams(); // TODO: replace with state management due to expo-router limitations
+  const { typeGroup } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (!typeGroup) {
+      router.navigate('/home/report/details/typegroups');
+    }
+  }, [typeGroup]);
+
+  const group = typeof typeGroup === 'string' ? typeGroup : typeGroup[0];
+  const types = useAppSelector((state) => state.report.issueGroups[group].types);
+  const iconName = useAppSelector((state) => state.report.issueGroups[group].iconName);
+  const authorityId = useAppSelector((state) => state.report.issueGroups[group].authorityId);
 
   return (
     <View style={styles.container}>
-      {authority && (
+      {authorityId ? (
         <FlatList
           contentContainerStyle={styles.list}
           data={types}
@@ -30,9 +41,9 @@ export default function ReportTypesScreen() {
               <TouchableOpacity
                 style={styles.selector}
                 onPress={() => {
-                  dispatch(updateAuthority(authority));
+                  dispatch(authorityIdUpdated(authorityId));
                   dispatch(updateDetails({ ...details, type, iconName }));
-                  router.navigate('/home/report/details'); // TODO: replace with state management due to expo-router limitations
+                  router.navigate('/home/report/details');
                 }}
               >
                 <Entypo
@@ -46,8 +57,7 @@ export default function ReportTypesScreen() {
             );
           }}
         />
-      )}
-      {!authority && (
+      ) : (
         <View style={styles.placeholder}>
           <Text>Location Required for Issue Types</Text>
         </View>
