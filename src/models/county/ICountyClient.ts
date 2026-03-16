@@ -1,3 +1,4 @@
+import IAuthority from "./IAuthority";
 import { IIssueGroup } from "./ICounty";
 
 /**
@@ -7,4 +8,7 @@ import { IIssueGroup } from "./ICounty";
 export default interface ICountyClient {
     /* Creates a new report based on IReport*/
     getIssueGroups: (county: string) => Promise<IIssueGroup[]>;
+
+    /* Get's the details about a given Authority */
+    getAuthority: (id: string) => Promise<IAuthority>;
 }
