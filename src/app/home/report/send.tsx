@@ -9,7 +9,7 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import { senderIdUpdated, reportReset, isLoadingStarted, isLoadingStopped } from '@/redux/features/reportSlice';
 import validate from '@/redux/validate';
 import Header from '@/components/Header';
-import Colors from '@/constants/Colors';
+import Colors from '@/styles/constants/Colors';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';

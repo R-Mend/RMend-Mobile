@@ -9,8 +9,8 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import openMap from 'react-native-open-maps';
 import { Link } from 'expo-router'; // TODO: Consider if this needs to be replaced with a different navigation method like router.back()
 
-import mapStyle from '@/constants/MapStyle';
-import Colors from '@/constants/Colors';
+import mapStyle from '@/styles/MapStyle';
+import Colors from '@/styles/constants/Colors';
 
 
 // interface ReportInfoScreenProps extends MainHomeStackScreenProps<'ReportInfo'> {}

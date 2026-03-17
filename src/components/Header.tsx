@@ -5,7 +5,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import Colors from '@/constants/Colors';
+import Colors from '@/styles/constants/Colors';
 
 
 interface IHeaderProps {

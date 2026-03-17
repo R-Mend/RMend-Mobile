@@ -9,7 +9,7 @@ import {
 } from 'react-native-responsive-screen';
 import { useRouter } from 'expo-router';
 
-import Colors from '@/constants/Colors';
+import Colors from '@/styles/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import CommonStyles from '@/styles/CommonStyles';

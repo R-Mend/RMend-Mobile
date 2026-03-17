@@ -9,10 +9,10 @@ import {
 } from 'react-native-responsive-screen';
 
 import Header from '@/components/Header';
-import mapStyle from '@/constants/MapStyle';
+import mapStyle from '@/styles/MapStyle';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { locationUpdated, countyUpdated, reportReset } from '@/redux/features/reportSlice';
-import currentAuthJSON from '@/constants/json/current_rmend_counties.json' with { type: 'json' };
+import currentAuthJSON from '@/assets/json/current_rmend_counties.json';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useRouter } from 'expo-router';
 
