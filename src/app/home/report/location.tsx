@@ -13,7 +13,7 @@ import mapStyle from '@/constants/MapStyle';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { locationUpdated, countyUpdated, reportReset } from '@/redux/features/reportSlice';
 import currentAuthJSON from '@/constants/json/current_rmend_counties.json' with { type: 'json' };
-// import LoadingOverlay from '@/components/LoadingOverlay';
+import LoadingOverlay from '@/components/LoadingOverlay';
 import { useRouter } from 'expo-router';
 
 
@@ -24,6 +24,7 @@ export default function ReportLocationScreen() {
   
   const dispatch = useAppDispatch();
   const location = useAppSelector((state) => state.report.location);
+  const isLoading = useAppSelector((state) => state.report.isLoading);
 
   const router = useRouter();
 
@@ -63,7 +64,7 @@ export default function ReportLocationScreen() {
 
   return (
     <View style={styles.scrollContainer}>
-      {/* {isLoading && <LoadingOverlay />} */}
+      {isLoading && <LoadingOverlay />}
       <Header
         title="Location"
         navTitleOne="Home"
