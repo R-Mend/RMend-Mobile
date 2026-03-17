@@ -1,16 +1,16 @@
+import { ReportReducerState } from "./features/reportSlice";
+
 export interface IValidationErrors {
   photos?: string,
   location?: string,
   type?: string,
   authority?: string,
-  name?: string,
-  email?: string
 }
 
-const validate = (values) => {
+const validate = (values: ReportReducerState) => {
   const errors: IValidationErrors = {};
   if (values.images && values.images.length < 1) {
-    errors.photos = 'One Photo is Required';
+    errors.photos = 'At least one photo is required to submit report.';
   }
   if (!values.location) {
     errors.location = 'Required';
@@ -18,11 +18,8 @@ const validate = (values) => {
   if (!values.details.type) {
     errors.type = 'Required';
   }
-  if (!values.senderInfo.name) {
-    errors.name = 'Required';
-  }
-  if (!values.senderInfo.email) {
-    errors.email = 'Required';
+  if (!values.authorityId) {
+    errors.authority = 'Required';
   }
   return errors;
 };

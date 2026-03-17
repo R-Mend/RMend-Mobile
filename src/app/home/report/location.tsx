@@ -11,9 +11,9 @@ import {
 import Header from '@/components/Header';
 import mapStyle from '@/constants/MapStyle';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { updateLocation, updateCounty, resetReport } from '@/redux/features/reportSlice';
+import { locationUpdated, countyUpdated, reportReset } from '@/redux/features/reportSlice';
 import currentAuthJSON from '@/constants/json/current_rmend_counties.json' with { type: 'json' };
-// import LoadingOverlay from '@/components/LoadingOverlay';
+import LoadingOverlay from '@/components/LoadingOverlay';
 import { useRouter } from 'expo-router';
 
 
@@ -24,6 +24,7 @@ export default function ReportLocationScreen() {
   
   const dispatch = useAppDispatch();
   const location = useAppSelector((state) => state.report.location);
+  const isLoading = useAppSelector((state) => state.report.isLoading);
 
   const router = useRouter();
 
@@ -42,7 +43,7 @@ export default function ReportLocationScreen() {
 
   const updateRegion = (region) => {
     const { latitude, longitude } = region;
-    dispatch(updateLocation({ latitude, longitude }));
+    dispatch(locationUpdated({ latitude, longitude }));
     updateReportsCounty(latitude, longitude);
   };
 
@@ -53,24 +54,24 @@ export default function ReportLocationScreen() {
       if (booleanContains(feature, coordinate)) {
         found = true;
         const county = feature.properties.NAME;
-        dispatch(updateCounty(county));
+        dispatch(countyUpdated(county));
       }
     });
     if (!found) {
-      dispatch(updateCounty(''));
+      dispatch(countyUpdated(''));
     }
   };
 
   return (
     <View style={styles.scrollContainer}>
-      {/* {isLoading && <LoadingOverlay />} */}
+      {isLoading && <LoadingOverlay />}
       <Header
         title="Location"
         navTitleOne="Home"
         navTitleTwo="Next"
         navActionOne={() => {
-          dispatch(resetReport());
           router.dismiss();
+          dispatch(reportReset());
         }}
         navActionTwo={() => router.navigate('/home/report/details')}
       />

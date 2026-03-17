@@ -1,89 +1,95 @@
-import { IIssueGroup } from '@/models/county/ICounty'
+import { PayloadAction } from '@reduxjs/toolkit';
+
+import { IIssueGroup } from '@/models/county/ICounty';
+import IReport, { IReportDetails, IReportImage, IReportLocation } from '@/models/report/IReport';
 import { createSlice } from '@reduxjs/toolkit'
 
-export type ReportState = {
-    images: string[],
+export type ReportReducerState = IReport & {
     county: string,
-    authorityId: string,
-    location: {
-        longitude: number,
-        latitude: number
-    },
-    details: {
-        type: string,
-        details: string,
-        iconName: string
-    },
-    senderInfo: {
-        name: string,
-        email: string,
-        phoneNumber: string,
-    },
-    isLoading: boolean,
-    issueGroups: IIssueGroup[]
-}
+    issueGroups: IIssueGroup[],
+    isLoading: boolean
+};
 
-const initialState: ReportState = {
-    images: [],
-    county: '',
+const initialState: ReportReducerState = {
+    id: '',
     authorityId: '',
-    location: { latitude: 37.78825, longitude: -122.4324 },
-    details: { type: null, details: null, iconName: null },
-    senderInfo: { name: null, email: null, phoneNumber: null },
-    isLoading: false,
-    issueGroups: []
+    senderId: '',
+    timeCreated: '',
+    images: [],
+    details: {
+        description: '',
+        iconName: '',
+        type: ''
+    },
+    location: {
+        latitude: null,
+        longitude: null
+    },
+    county: '',
+    issueGroups: [],
+    isLoading: false
 };
 
 const reportSlice = createSlice({
     name: 'report',
     initialState,
     reducers: {
-        resetReport: () => initialState,
+        reportReset: () => initialState,
 
-        addImage(state, { payload }) {
-            state.images.push(payload);
+        imageAdded(state, action: PayloadAction<IReportImage>) {
+            state.images.push(action.payload);
         },
 
-        removeImage(state, { payload }) {
-            state.images = state.images.filter((_, index) => index != payload);
+        imageRemoved(state, action: PayloadAction<number>) {
+            state.images = state.images.filter((_, index) => index != action.payload);
         },
 
-        updateLocation(state, { payload }) {
-            state.location = payload;
+        locationUpdated(state, action: PayloadAction<IReportLocation>) {
+            state.location = action.payload;
         },
 
-        updateDetails(state, { payload }) {
-            state.details = payload;
+        detailsUpdated(state, action: PayloadAction<IReportDetails>) {
+            state.details = action.payload;
         },
 
-        updateSenderInfo(state, { payload }) {
-            state.senderInfo = payload;
+        senderIdUpdated(state, action: PayloadAction<string>) {
+            state.senderId = action.payload;
         },
 
-        updateCounty(state, { payload }) {
-            state.county = payload;
+        countyUpdated(state, action: PayloadAction<string>) {
+            state.county = action.payload;
         },
 
-        authorityIdUpdated(state, { payload }) {
-            state.authorityId = payload;
+        authorityIdUpdated(state, action: PayloadAction<string>) {
+            state.authorityId = action.payload;
         },
 
-        issueGroupsUpdated(state, { payload }) {
-            state.issueGroups = payload;
+        issueGroupsUpdated(state, action: PayloadAction<IIssueGroup[]>) {
+            state.issueGroups = action.payload;
+        },
+
+        isLoadingStarted(state) {
+            state.isLoading = true;
+        },
+
+        isLoadingStopped(state) {
+            state.isLoading = false;
         }
     }
 });
 
 export const {
-    resetReport,
-    addImage,
-    removeImage,
-    updateLocation,
-    updateDetails,
-    updateSenderInfo,
-    updateCounty,
+    reportReset,
+    imageAdded,
+    imageRemoved,
+    locationUpdated,
+    detailsUpdated,
+    senderIdUpdated,
+    countyUpdated,
     authorityIdUpdated,
-    issueGroupsUpdated
+    issueGroupsUpdated,
+    isLoadingStarted,
+    isLoadingStopped
 } = reportSlice.actions
 
 export default reportSlice.reducer;

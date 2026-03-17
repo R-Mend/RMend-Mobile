@@ -7,7 +7,7 @@ import {
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import { updateDetails, resetReport, issueGroupsUpdated } from '@/redux/features/reportSlice';
+import { detailsUpdated, reportReset, issueGroupsUpdated } from '@/redux/features/reportSlice';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
@@ -60,14 +60,14 @@ export default function ReportDetailsScreen() {
         navTitleOne="Home"
         navTitleTwo="Next"
         navActionOne={() => {
-          dispatch(resetReport());
           router.dismiss();
+          dispatch(reportReset());
         }}
         navActionTwo={() => router.navigate('/home/report/send')}
       />
       <Text style={styles.header}>Incident Type</Text>
       <Text style={styles.subHeader}>Required</Text>
-      {!details.type && (
+      {!details.type ? (
         <TouchableOpacity
           style={styles.mainSelector}
           disabled={issueGroups.length > 0 ? false : true}
@@ -76,13 +76,9 @@ export default function ReportDetailsScreen() {
           <Text style={styles.selectorText}>
             {issueGroups.length > 0 ? 'Select the incident type' : 'Loading issue groups...'}
           </Text>
-          {issueGroups.length == 0 && <ActivityIndicator size="small" color="white" />}
-          {issueGroups.length > 0 && (
-            <MaterialIcons name="navigate-next" size={25} color="#FFF" />
-          )}
+          {issueGroups.length == 0 ? <ActivityIndicator size="small" color="white" /> : <MaterialIcons name="navigate-next" size={25} color="#FFF" />}
         </TouchableOpacity>
-      )}
-      {details.type && (
+      ) : (
         <TouchableOpacity
           style={styles.selector}
           onPress={() => handleIssueGroupPress()}
@@ -99,10 +95,10 @@ export default function ReportDetailsScreen() {
       <Text style={styles.header}>Details</Text>
       <Text style={styles.subHeader}>Optional</Text>
       <TextInput
-        value={details.details}
+        value={details.description}
         style={styles.details}
         onChangeText={(text) =>
-          dispatch(updateDetails({ type: details.type, details: text, iconName: details.iconName }))
+          dispatch(detailsUpdated({ type: details.type, description: text, iconName: details.iconName }))
         }
         placeholder="Enter a description of the incident"
         placeholderTextColor="#666"

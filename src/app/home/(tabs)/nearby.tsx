@@ -1,3 +1,4 @@
+import firebase from 'firebase/compat/app';
 import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,19 +9,20 @@ import {
 import * as Location from 'expo-location';
 import { get } from 'geofirex';
 import { useRouter } from 'expo-router';
-
-import { geo } from '@/config/FirebaseApp';
+import * as geofirex from 'geofirex';
 
 
 export default function NearbyScreen() {
   const [reports, setReports] = React.useState([]);
   // const [isLoaded, setIsLoaded] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [geo, setGeo] = React.useState(null);
   
   const router = useRouter();
 
   React.useEffect(() => {
     _getReportsAsync();
+    setGeo(geofirex.init(firebase));
   }, []);
 
   const _getReportsAsync = async () => {
