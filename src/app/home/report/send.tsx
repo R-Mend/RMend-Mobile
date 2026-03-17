@@ -6,8 +6,7 @@ import {
 } from 'react-native-responsive-screen';
 
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { updateSenderInfo, resetReport } from '@/redux/features/reportSlice';
-import { createReport } from '@/config/FirebaseApp';
+import { senderIdUpdated, reportReset, isLoadingStarted, isLoadingStopped } from '@/redux/features/reportSlice';
 import validate from '@/redux/validate';
 import Header from '@/components/Header';
 import Colors from '@/constants/Colors';
@@ -15,38 +14,30 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { FirebaseCountyClient } from '@/services/county/FirebaseCountyClient';
+import { FirebaseReportClient } from '@/services/report/FirebaseReportClient';
 import IAuthority from '@/models/county/IAuthority';
 
 
 export default function ReportSendScreen() {
-  const [name, setName] = React.useState(null);
-  const [email, setEmail] = React.useState(null);
-  const [phoneNumber, setPhoneNumber] = React.useState(null);
   const [authority, setAuthority] = React.useState<IAuthority>(null);
 
   const dispatch = useAppDispatch();
   const report = useAppSelector((state) => state.report);
+  const isLoading = useAppSelector((state) => state.report.isLoading);
 
   const router = useRouter();
   const { user } = useAuth();
 
   React.useEffect(() => {
     if (user) {
-      dispatch(updateSenderInfo({
-        name: user.displayName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-      }));
-      setName(user.displayName);
-      setEmail(user.email);
-      setPhoneNumber(user.phoneNumber);
+      dispatch(senderIdUpdated(user.uid));
     }
   }, [user]);
 
   React.useEffect(() => {
     if (report.authorityId) {
       FirebaseCountyClient.getAuthority(report.authorityId).then((authority) => {
-        if (authority) {
+        if (authority != undefined) {
           setAuthority(authority);
         }
       });
@@ -57,37 +48,39 @@ export default function ReportSendScreen() {
     const errors = validate(report);
     if (Object.values(errors).length > 0) {
       Alert.alert(
-        'A Required Field Is Missing',
+        'One or More Required Fields Are Missing',
         'Check that all the required fields have been provided.',
         [{ text: 'Ok', style: 'cancel' }]
       );
-    } else {
-      // startUpload();
-      const results = await createReport(report);
-      if (results.error) {
-        Alert.alert(
-          'An error occurred while creating the report',
-          'Please try again and if the issue continues try uploading images with better connection.',
-          [{ text: 'Ok' }]
-        );
-        // stopUpload();
-      } else {
-        await dispatch(resetReport());
-        router.dismiss();
-      }
+      return;
+    }
+
+    try {
+      dispatch(isLoadingStarted());
+      await FirebaseReportClient.createReport(report);
+      dispatch(isLoadingStopped());
+      await dispatch(reportReset());
+      router.dismiss();
+    } catch (error) {
+      dispatch(isLoadingStopped());
+      Alert.alert(
+        'An error occurred while creating the report',
+        'Please try again and if the issue continues try uploading images with better connection.',
+        [{ text: 'Ok' }]
+      );
     }
   };
 
   return (
     <View style={styles.container}>
-      {report.isLoading && <LoadingOverlay />}
+      {isLoading && <LoadingOverlay />}
       <Header
         title="Send"
         navTitleOne="Home"
         navTitleTwo="Send"
         navActionOne={() => {
-          dispatch(resetReport());
           router.dismiss();
+          dispatch(reportReset());
         }}
         navActionTwo={() => {
           Alert.alert(
@@ -134,8 +127,7 @@ export default function ReportSendScreen() {
             <Text style={styles.inputLabel}>Name</Text>
             <TextInput
               style={styles.input}
-              value={name}
-              onChangeText={(text) => dispatch(updateSenderInfo({ ...report.senderInfo, name: text }))}
+              value={user.displayName}
               placeholder="Required"
               editable={false}
             />
@@ -144,8 +136,7 @@ export default function ReportSendScreen() {
             <Text style={styles.inputLabel}>Email</Text>
             <TextInput
               style={styles.input}
-              value={email}
-              onChangeText={(text) => dispatch(updateSenderInfo({ ...report.senderInfo, email: text }))}
+              value={user.email}
               placeholder="Required"
               editable={false}
             />
@@ -154,8 +145,7 @@ export default function ReportSendScreen() {
             <Text style={styles.inputLabel}>Phone</Text>
             <TextInput
               style={styles.input}
-              value={phoneNumber}
-              onChangeText={(text) => dispatch(updateSenderInfo({ ...report.senderInfo, phoneNumber: text }))}
+              value={user.phoneNumber}
               placeholder="Optional"
               editable={false}
             />

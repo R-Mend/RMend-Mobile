@@ -10,7 +10,7 @@ import {
 
 import Header from '@/components/Header';
 // import InfoMessage from '../../components/InfoMessage';
-import { addImage, removeImage, resetReport } from '@/redux/features/reportSlice';
+import { imageAdded, imageRemoved, reportReset } from '@/redux/features/reportSlice';
 const imagesPlaceholder = '../../../assets/images/placeholder-dark.jpg';
 // import LoadingOverlay from '@/components/LoadingOverlay';
 import { useRouter } from 'expo-router';
@@ -51,7 +51,7 @@ export default function ReportScreen() {
       quality: 1,
     });
     if (!result.canceled) {
-      dispatch(addImage(result.assets[0].uri));
+      dispatch(imageAdded({ id: '', uri: result.assets[0].uri, url: '' }));
     }
   };
 
@@ -63,7 +63,8 @@ export default function ReportScreen() {
       base64: true,
     });
     if (!result.canceled) {
-      dispatch(addImage(result.assets[0].uri));
+      // const image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      dispatch(imageAdded({ id: '', uri: result.assets[0].uri, url: '' }));
     }
   };
 
@@ -99,8 +100,8 @@ export default function ReportScreen() {
         navTitleOne="Home"
         navTitleTwo="Next"
         navActionOne={() => {
-          dispatch(resetReport());
           router.dismiss();
+          dispatch(reportReset());
         }}
         navActionTwo={() => router.navigate('/home/report/location')}
       />
@@ -122,9 +123,9 @@ export default function ReportScreen() {
             <View style={styles.imageWrapper} key={index}>
               {/* TODO: Determine if isStatic is needed and if so what to replace it with */}
               {/* <Image source={{ isStatic: true, uri: image }} style={styles.image} /> */}
-              <Image source={{ uri: image }} style={styles.image} />
+              <Image source={{ uri: image.uri }} style={styles.image} />
               <View style={styles.imageDeleteContainer}>
-                <TouchableOpacity style={styles.imageDelete} onPress={() => dispatch(removeImage(index))}>
+                <TouchableOpacity style={styles.imageDelete} onPress={() => dispatch(imageRemoved(index))}>
                   <AntDesign name="delete" size={wp('5%')} color={'white'} />
                 </TouchableOpacity>
               </View>

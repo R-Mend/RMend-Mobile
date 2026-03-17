@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, StyleSheet, TouchableOpacity, FlatList, View } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -7,13 +7,17 @@ import {
 import { Entypo } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { updateDetails, authorityIdUpdated } from '@/redux/features/reportSlice';
+import { detailsUpdated, authorityIdUpdated } from '@/redux/features/reportSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { IIssueGroup } from '@/models/county/ICounty';
 
 
 export default function ReportTypesScreen() {
+  const [issueGroup, setIssueGroup] = useState<IIssueGroup>(null)
+
   const dispatch = useAppDispatch();
   const details = useAppSelector((state) => state.report.details);
+  const issueGroups = useAppSelector((state) => state.report.issueGroups);
 
   const router = useRouter();
   const { typeGroup } = useLocalSearchParams();
@@ -21,33 +25,31 @@ export default function ReportTypesScreen() {
   useEffect(() => {
     if (!typeGroup) {
       router.navigate('/home/report/details/typegroups');
+    } else {
+      const group = typeof typeGroup === 'string' ? typeGroup : typeGroup[0];
+      setIssueGroup(issueGroups[group]);
     }
   }, [typeGroup]);
 
-  const group = typeof typeGroup === 'string' ? typeGroup : typeGroup[0];
-  const types = useAppSelector((state) => state.report.issueGroups[group].types);
-  const iconName = useAppSelector((state) => state.report.issueGroups[group].iconName);
-  const authorityId = useAppSelector((state) => state.report.issueGroups[group].authorityId);
-
   return (
     <View style={styles.container}>
-      {authorityId ? (
+      {issueGroup ? (
         <FlatList
           contentContainerStyle={styles.list}
-          data={types}
+          data={issueGroup.types}
           renderItem={(item) => {
             const type = item.item;
             return (
               <TouchableOpacity
                 style={styles.selector}
                 onPress={() => {
-                  dispatch(authorityIdUpdated(authorityId));
-                  dispatch(updateDetails({ ...details, type, iconName }));
+                  dispatch(authorityIdUpdated(issueGroup.authorityId));
+                  dispatch(detailsUpdated({ ...details, type, iconName: issueGroup.iconName }));
                   router.navigate('/home/report/details');
                 }}
               >
                 <Entypo
-                  name={iconName as any}
+                  name={issueGroup.iconName as any}
                   size={wp('7%')}
                   color="#ff6a30"
                   style={{ marginLeft: wp('2%') }}
