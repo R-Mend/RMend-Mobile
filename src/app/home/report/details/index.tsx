@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 
 import { detailsUpdated, reportReset, issueGroupsUpdated } from '@/redux/features/reportSlice';
 import Header from '@/components/Header';
-import Colors from '@/constants/Colors';
+import Colors from '@/styles/constants/Colors';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { FirebaseCountyClient } from '@/services/county/FirebaseCountyClient';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';

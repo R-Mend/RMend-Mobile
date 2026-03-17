@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import Colors from '@/constants/Colors';
+import Colors from '@/styles/constants/Colors';
 
 export interface ICommonStyles {
   container: object;
