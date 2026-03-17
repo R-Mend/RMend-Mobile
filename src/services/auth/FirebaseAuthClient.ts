@@ -5,7 +5,7 @@ import {
   updateProfile,
   sendPasswordResetEmail,
   updateEmail,
-  User,
+  User
 } from 'firebase/auth';
 
 import { auth, db } from '@/services/firebase';
